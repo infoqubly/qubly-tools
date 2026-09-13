@@ -1359,6 +1359,390 @@
       display: none;
     }
 
+    [hidden] {
+      display: none !important;
+    }
+
+    .launcher-view {
+      width: 100%;
+      min-height: 100%;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(115, 203, 194, 0.13), transparent 34%),
+        radial-gradient(circle at 82% 78%, rgba(240, 184, 90, 0.14), transparent 36%),
+        var(--bg);
+    }
+
+    .launcher-panel {
+      width: min(940px, 100%);
+      display: grid;
+      gap: 30px;
+    }
+
+    .launcher-brand {
+      display: grid;
+      gap: 9px;
+      text-align: center;
+    }
+
+    .launcher-mark {
+      width: 58px;
+      height: 58px;
+      margin: 0 auto 4px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(240, 184, 90, 0.55);
+      border-radius: 16px;
+      background: rgba(240, 184, 90, 0.12);
+      color: #ffe1aa;
+      font-size: 20px;
+      font-weight: 900;
+      box-shadow: var(--shadow);
+    }
+
+    .launcher-brand h1 {
+      font-size: clamp(26px, 4vw, 42px);
+    }
+
+    .launcher-brand p {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .tool-choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .tool-choice {
+      min-height: 245px;
+      padding: 24px;
+      display: grid;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
+      gap: 13px;
+      align-items: start;
+      border-radius: 14px;
+      text-align: left;
+      background: linear-gradient(150deg, rgba(32, 39, 49, 0.98), rgba(16, 21, 27, 0.98));
+      box-shadow: var(--shadow);
+    }
+
+    .tool-choice:hover:not(:disabled) {
+      transform: translateY(-2px);
+    }
+
+    .tool-choice-icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: rgba(115, 203, 194, 0.12);
+      color: #cefffa;
+      font-size: 25px;
+    }
+
+    .tool-choice:last-child .tool-choice-icon {
+      background: rgba(240, 184, 90, 0.13);
+      color: #ffe1aa;
+    }
+
+    .tool-choice h2 {
+      font-size: 23px;
+    }
+
+    .tool-choice p {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 520;
+      line-height: 1.55;
+    }
+
+    .tool-choice-cta {
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 860;
+      letter-spacing: 0.02em;
+    }
+
+    .local-compare-view {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      background: var(--bg);
+    }
+
+    .local-compare-head {
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--line);
+      background: #101419;
+    }
+
+    .local-compare-title {
+      min-width: 0;
+      display: grid;
+      gap: 3px;
+    }
+
+    .local-compare-title h1 {
+      font-size: 18px;
+    }
+
+    .local-compare-title p {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .menu-button,
+    .local-reset-button {
+      min-height: 38px;
+      padding: 0 13px;
+    }
+
+    .local-compare-shell {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(270px, 330px) minmax(0, 1fr);
+      gap: 12px;
+      padding: 12px;
+    }
+
+    .local-file-panel {
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) minmax(0, 1fr) auto;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: auto;
+    }
+
+    .local-file-intro {
+      display: grid;
+      gap: 5px;
+    }
+
+    .local-file-intro strong {
+      font-size: 15px;
+    }
+
+    .local-file-intro span,
+    .local-privacy-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .local-file-picker {
+      min-height: 150px;
+      position: relative;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: 8px;
+      padding: 10px;
+      border: 1px dashed #506070;
+      border-radius: 10px;
+      background: #0e1319;
+      cursor: pointer;
+      overflow: hidden;
+      transition: border-color 140ms ease, background 140ms ease;
+    }
+
+    .local-file-picker:hover,
+    .local-file-picker:focus-within,
+    .local-file-picker.drag-over {
+      border-color: var(--accent);
+      background: rgba(240, 184, 90, 0.07);
+    }
+
+    .local-file-input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .local-file-preview-box {
+      min-height: 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      border-radius: 7px;
+      background: #050709;
+    }
+
+    .local-file-preview {
+      width: 100%;
+      height: 100%;
+      min-height: 82px;
+      object-fit: contain;
+    }
+
+    .local-file-placeholder {
+      display: grid;
+      place-items: center;
+      gap: 5px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .local-file-placeholder strong {
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .local-file-copy {
+      min-width: 0;
+      display: grid;
+      gap: 2px;
+    }
+
+    .local-file-copy strong,
+    .local-file-copy span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .local-file-copy strong {
+      font-size: 13px;
+    }
+
+    .local-file-copy span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .local-viewer {
+      min-width: 0;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: 10px;
+    }
+
+    .local-compare-stage {
+      min-height: 360px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background:
+        linear-gradient(45deg, #090c10 25%, transparent 25%),
+        linear-gradient(-45deg, #090c10 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #090c10 75%),
+        linear-gradient(-45deg, transparent 75%, #090c10 75%),
+        #050709;
+      background-size: 28px 28px;
+      background-position: 0 0, 0 14px, 14px -14px, -14px 0;
+      box-shadow: var(--shadow);
+    }
+
+    .local-empty-state {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 26px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .local-compare-canvas {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      background: #040506;
+    }
+
+    .local-compare-canvas img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .local-compare-canvas .compare-drag-zone[hidden],
+    .local-compare-canvas .compare-bar[hidden],
+    .local-compare-canvas .compare-knob[hidden] {
+      display: none !important;
+    }
+
+    .local-swap-nav {
+      position: absolute;
+      top: 50%;
+      z-index: 5;
+      width: 52px;
+      height: 58px;
+      min-height: 58px;
+      padding: 0;
+      transform: translateY(-50%);
+      border-color: rgba(240, 184, 90, 0.72);
+      background: rgba(16, 20, 25, 0.82);
+      color: #ffe1aa;
+      font-size: 34px;
+      backdrop-filter: blur(8px);
+    }
+
+    .local-swap-nav.left {
+      left: 12px;
+    }
+
+    .local-swap-nav.right {
+      right: 12px;
+    }
+
+    .local-mode-controls {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel);
+    }
+
+    .local-mode-controls button {
+      min-height: 44px;
+      padding: 0 10px;
+    }
+
+    .local-mode-controls button[aria-pressed="true"] {
+      border-color: var(--accent);
+      background: rgba(240, 184, 90, 0.16);
+      color: #ffe1aa;
+    }
+
+    .local-key-hint {
+      grid-column: 1 / -1;
+      color: var(--muted);
+      text-align: center;
+      font-size: 11px;
+    }
+
     .fatal {
       max-width: 780px;
       margin: 70px auto;
@@ -1408,17 +1792,108 @@
         max-height: none;
         overflow: visible;
       }
+
+      .local-compare-view {
+        height: auto;
+        min-height: 100vh;
+      }
+
+      .local-compare-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .local-file-panel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: auto minmax(190px, auto) auto;
+      }
+
+      .local-file-intro,
+      .local-privacy-note {
+        grid-column: 1 / -1;
+      }
+
+      .local-compare-stage {
+        min-height: min(68vh, 720px);
+      }
+    }
+
+    @media (max-width: 680px) {
+      .launcher-view {
+        padding: 20px 14px;
+      }
+
+      .tool-choice-grid,
+      .local-file-panel {
+        grid-template-columns: 1fr;
+      }
+
+      .tool-choice {
+        min-height: 205px;
+      }
+
+      .local-file-intro,
+      .local-privacy-note {
+        grid-column: auto;
+      }
+
+      .local-compare-head {
+        align-items: flex-start;
+      }
+
+      .local-compare-title p {
+        display: none;
+      }
+
+      .local-mode-controls {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .local-mode-controls .split-control,
+      .local-key-hint {
+        grid-column: 1 / -1;
+      }
+
+      .local-mode-controls .split-control {
+        grid-row: 1;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="app">
+  <section class="launcher-view" id="launcherView" aria-labelledby="launcherTitle">
+    <div class="launcher-panel">
+      <div class="launcher-brand">
+        <div class="launcher-mark" aria-hidden="true">QB</div>
+        <h1 id="launcherTitle">Strumenti immagini QUBLY</h1>
+        <p>Scegli lo strumento che vuoi usare.</p>
+      </div>
+
+      <div class="tool-choice-grid">
+        <button class="tool-choice" id="openRatingTool" type="button">
+          <span class="tool-choice-icon" aria-hidden="true">★</span>
+          <h2>Valutazione render</h2>
+          <p>Apri lo strumento esistente con immagini, voti, classifiche e sincronizzazione condivisa.</p>
+          <span class="tool-choice-cta">Apri valutazione →</span>
+        </button>
+
+        <button class="tool-choice" id="openLocalCompareTool" type="button">
+          <span class="tool-choice-icon" aria-hidden="true">↔</span>
+          <h2>Confronto immagini</h2>
+          <p>Carica due immagini dal computer e confrontale con la barra oppure alternandole all’istante.</p>
+          <span class="tool-choice-cta">Apri confronto →</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div class="app" id="ratingApp" hidden>
     <header class="topbar">
       <div class="brand">
         <h1>QB</h1>
         <p class="status" id="statusLine">Caricamento...</p>
       </div>
       <nav class="top-actions" aria-label="Viste">
+        <button class="tab-button" id="ratingMenuButton" type="button">Strumenti</button>
         <button class="tab-button" id="reviewTab" type="button" aria-pressed="true">Valutazione</button>
         <button class="tab-button" id="finalTab" type="button" aria-pressed="false">Confronto finale</button>
         <button class="tab-button" id="syncUploadButton" type="button">Carica locali</button>
@@ -1590,6 +2065,76 @@
     </main>
   </div>
 
+  <section class="local-compare-view" id="localCompareView" aria-labelledby="localCompareTitle" hidden>
+    <header class="local-compare-head">
+      <button class="menu-button" id="compareMenuButton" type="button">← Strumenti</button>
+      <div class="local-compare-title">
+        <h1 id="localCompareTitle">Confronto immagini</h1>
+        <p>Confronto temporaneo: i file restano solo in questa pagina.</p>
+      </div>
+      <button class="local-reset-button" id="localResetButton" type="button" disabled>Rimuovi immagini</button>
+    </header>
+
+    <div class="local-compare-shell">
+      <aside class="local-file-panel" aria-label="Selezione immagini locali">
+        <div class="local-file-intro">
+          <strong>Scegli due immagini</strong>
+          <span>Puoi cliccare oppure trascinare un file in ciascun riquadro.</span>
+        </div>
+
+        <label class="local-file-picker" id="localPicker1" for="localFile1">
+          <input class="local-file-input" id="localFile1" type="file" accept="image/*">
+          <span class="local-file-preview-box">
+            <span class="local-file-placeholder" id="localPlaceholder1"><strong>Immagine 1</strong><span>Scegli dal computer</span></span>
+            <img class="local-file-preview" id="localPreview1" alt="Anteprima Immagine 1" hidden>
+          </span>
+          <span class="local-file-copy">
+            <strong id="localName1">Nessun file selezionato</strong>
+            <span id="localMeta1">File locale temporaneo</span>
+          </span>
+        </label>
+
+        <label class="local-file-picker" id="localPicker2" for="localFile2">
+          <input class="local-file-input" id="localFile2" type="file" accept="image/*">
+          <span class="local-file-preview-box">
+            <span class="local-file-placeholder" id="localPlaceholder2"><strong>Immagine 2</strong><span>Scegli dal computer</span></span>
+            <img class="local-file-preview" id="localPreview2" alt="Anteprima Immagine 2" hidden>
+          </span>
+          <span class="local-file-copy">
+            <strong id="localName2">Nessun file selezionato</strong>
+            <span id="localMeta2">File locale temporaneo</span>
+          </span>
+        </label>
+
+        <p class="local-privacy-note">Le immagini non vengono caricate su GitHub, non entrano nella sincronizzazione e vengono eliminate dalla pagina quando le rimuovi o la chiudi.</p>
+      </aside>
+
+      <section class="local-viewer" aria-label="Visualizzatore di confronto">
+        <div class="local-compare-stage" id="localCompareStage">
+          <div class="local-empty-state" id="localEmptyState">Carica Immagine 1 e Immagine 2 per iniziare il confronto.</div>
+          <div class="local-compare-canvas" id="localCompareCanvas" hidden>
+            <img id="localCompareImage1" alt="Immagine 1">
+            <img id="localCompareImage2" alt="Immagine 2">
+            <span class="compare-label before" id="localLabel1">Immagine 1</span>
+            <span class="compare-label after" id="localLabel2">Immagine 2</span>
+            <div class="compare-bar" id="localCompareBar"></div>
+            <div class="compare-knob" id="localCompareKnob">↔</div>
+            <div class="compare-drag-zone" id="localCompareDrag" role="slider" tabindex="0" aria-label="Trascina il confronto tra Immagine 1 e Immagine 2" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"></div>
+            <button class="local-swap-nav left" id="localShowImage1" type="button" aria-label="Mostra Immagine 1">‹</button>
+            <button class="local-swap-nav right" id="localShowImage2" type="button" aria-label="Mostra Immagine 2">›</button>
+          </div>
+        </div>
+
+        <div class="local-mode-controls" aria-label="Modalità di confronto">
+          <button id="localModeImage1" type="button" aria-pressed="false">← Immagine 1</button>
+          <button class="split-control primary-button" id="localModeSplit" type="button" aria-pressed="true">↔ Barra di confronto</button>
+          <button id="localModeImage2" type="button" aria-pressed="false">Immagine 2 →</button>
+          <span class="local-key-hint">Tastiera: ← mostra Immagine 1 · → mostra Immagine 2 · spazio torna alla barra</span>
+        </div>
+      </section>
+    </div>
+  </section>
+
   <div class="overlay" id="overlay" hidden>
     <div class="overlay-head">
       <div class="overlay-title" id="overlayTitle">-</div>
@@ -1655,6 +2200,13 @@
       const pendingRankingSync = new Map();
 
       const els = {
+        launcherView: document.getElementById("launcherView"),
+        ratingApp: document.getElementById("ratingApp"),
+        localCompareView: document.getElementById("localCompareView"),
+        openRatingTool: document.getElementById("openRatingTool"),
+        openLocalCompareTool: document.getElementById("openLocalCompareTool"),
+        ratingMenuButton: document.getElementById("ratingMenuButton"),
+        compareMenuButton: document.getElementById("compareMenuButton"),
         statusLine: document.getElementById("statusLine"),
         reviewTab: document.getElementById("reviewTab"),
         finalTab: document.getElementById("finalTab"),
@@ -1736,9 +2288,44 @@
         overlayNext: document.getElementById("overlayNext"),
         overlayRankDown: document.getElementById("overlayRankDown"),
         overlayClose: document.getElementById("overlayClose"),
+        localResetButton: document.getElementById("localResetButton"),
+        localPicker1: document.getElementById("localPicker1"),
+        localPicker2: document.getElementById("localPicker2"),
+        localFile1: document.getElementById("localFile1"),
+        localFile2: document.getElementById("localFile2"),
+        localPlaceholder1: document.getElementById("localPlaceholder1"),
+        localPlaceholder2: document.getElementById("localPlaceholder2"),
+        localPreview1: document.getElementById("localPreview1"),
+        localPreview2: document.getElementById("localPreview2"),
+        localName1: document.getElementById("localName1"),
+        localName2: document.getElementById("localName2"),
+        localMeta1: document.getElementById("localMeta1"),
+        localMeta2: document.getElementById("localMeta2"),
+        localEmptyState: document.getElementById("localEmptyState"),
+        localCompareCanvas: document.getElementById("localCompareCanvas"),
+        localCompareImage1: document.getElementById("localCompareImage1"),
+        localCompareImage2: document.getElementById("localCompareImage2"),
+        localCompareBar: document.getElementById("localCompareBar"),
+        localCompareKnob: document.getElementById("localCompareKnob"),
+        localCompareDrag: document.getElementById("localCompareDrag"),
+        localLabel1: document.getElementById("localLabel1"),
+        localLabel2: document.getElementById("localLabel2"),
+        localShowImage1: document.getElementById("localShowImage1"),
+        localShowImage2: document.getElementById("localShowImage2"),
+        localModeImage1: document.getElementById("localModeImage1"),
+        localModeSplit: document.getElementById("localModeSplit"),
+        localModeImage2: document.getElementById("localModeImage2"),
       };
 
       let state = loadState();
+      let ratingStarted = false;
+      let activeTool = "menu";
+      let localComparePosition = 50;
+      let localCompareMode = "split";
+      const localImages = {
+        1: { file: null, url: "", width: 0, height: 0, loaded: false, error: false },
+        2: { file: null, url: "", width: 0, height: 0, loaded: false, error: false },
+      };
       let currentIndex = clamp(Number(state.currentIndex) || 0, 0, Math.max(variants.length - 1, 0));
       let currentSubjectKey = subjects[0]?.key || variants[0]?.subjectKey || "";
       let finalSelectedId = firstVariantForSubject(currentSubjectKey)?.id || variants[0]?.id || "";
@@ -2109,6 +2696,259 @@
 
       function clamp(value, min, max) {
         return Math.min(Math.max(value, min), max);
+      }
+
+      function pauseRemoteSync() {
+        if (!remotePollTimer) return;
+        window.clearInterval(remotePollTimer);
+        remotePollTimer = null;
+      }
+
+      function openTool(name) {
+        activeTool = name;
+        els.launcherView.hidden = true;
+        els.ratingApp.hidden = name !== "rating";
+        els.localCompareView.hidden = name !== "local-compare";
+        document.body.classList.toggle("final-mode", name === "rating" && !els.finalView.hidden);
+
+        if (name === "rating") {
+          if (!ratingStarted) {
+            ratingStarted = true;
+            renderReview();
+          } else {
+            refreshCurrentView();
+          }
+          startRemoteSync();
+          history.replaceState(null, "", `${location.pathname}#valutazione`);
+          return;
+        }
+
+        pauseRemoteSync();
+        renderLocalCompare();
+        history.replaceState(null, "", `${location.pathname}#confronta-immagini`);
+      }
+
+      function showToolMenu() {
+        const leavingLocalCompare = activeTool === "local-compare";
+        activeTool = "menu";
+        pauseRemoteSync();
+        if (!els.overlay.hidden) closeOverlay();
+        if (leavingLocalCompare) resetLocalImages();
+        document.body.classList.remove("final-mode");
+        els.ratingApp.hidden = true;
+        els.localCompareView.hidden = true;
+        els.launcherView.hidden = false;
+        history.replaceState(null, "", location.pathname);
+      }
+
+      function formatFileSize(bytes) {
+        const numeric = Number(bytes) || 0;
+        if (numeric < 1024) return `${numeric} B`;
+        if (numeric < 1024 * 1024) return `${Math.round(numeric / 102.4) / 10} KB`;
+        return `${Math.round(numeric / (1024 * 102.4)) / 10} MB`;
+      }
+
+      function localElements(slot) {
+        return slot === 1
+          ? {
+              input: els.localFile1,
+              preview: els.localPreview1,
+              placeholder: els.localPlaceholder1,
+              name: els.localName1,
+              meta: els.localMeta1,
+              image: els.localCompareImage1,
+            }
+          : {
+              input: els.localFile2,
+              preview: els.localPreview2,
+              placeholder: els.localPlaceholder2,
+              name: els.localName2,
+              meta: els.localMeta2,
+              image: els.localCompareImage2,
+            };
+      }
+
+      function updateLocalFileMeta(slot) {
+        const data = localImages[slot];
+        const parts = [];
+        if (data.width && data.height) parts.push(`${data.width} x ${data.height}`);
+        if (data.file) parts.push(formatFileSize(data.file.size));
+        localElements(slot).meta.textContent = parts.length ? parts.join(" · ") : "File locale temporaneo";
+      }
+
+      function setLocalFile(slot, file) {
+        const view = localElements(slot);
+        if (!file || !String(file.type || "").startsWith("image/")) {
+          view.meta.textContent = "Seleziona un file immagine valido";
+          return;
+        }
+
+        if (localImages[slot].url) URL.revokeObjectURL(localImages[slot].url);
+        const url = URL.createObjectURL(file);
+        localImages[slot] = { file, url, width: 0, height: 0, loaded: false, error: false };
+        view.name.textContent = file.name || `Immagine ${slot}`;
+        view.placeholder.hidden = true;
+        view.preview.hidden = false;
+        view.preview.src = url;
+        view.image.onload = () => {
+          localImages[slot].width = view.image.naturalWidth || 0;
+          localImages[slot].height = view.image.naturalHeight || 0;
+          localImages[slot].loaded = true;
+          localImages[slot].error = false;
+          updateLocalFileMeta(slot);
+          renderLocalCompare();
+        };
+        view.image.onerror = () => {
+          localImages[slot].loaded = false;
+          localImages[slot].error = true;
+          view.meta.textContent = "Impossibile leggere questa immagine";
+          renderLocalCompare();
+        };
+        view.image.src = url;
+        updateLocalFileMeta(slot);
+        renderLocalCompare();
+      }
+
+      function clearLocalFile(slot) {
+        const data = localImages[slot];
+        const view = localElements(slot);
+        if (data.url) URL.revokeObjectURL(data.url);
+        localImages[slot] = { file: null, url: "", width: 0, height: 0, loaded: false, error: false };
+        view.input.value = "";
+        view.preview.removeAttribute("src");
+        view.preview.hidden = true;
+        view.placeholder.hidden = false;
+        view.name.textContent = "Nessun file selezionato";
+        view.meta.textContent = "File locale temporaneo";
+        view.image.removeAttribute("src");
+      }
+
+      function resetLocalImages() {
+        clearLocalFile(1);
+        clearLocalFile(2);
+        localComparePosition = 50;
+        localCompareMode = "split";
+        renderLocalCompare();
+      }
+
+      function localCompareReady() {
+        return Boolean(localImages[1].loaded && localImages[2].loaded);
+      }
+
+      function applyLocalComparePosition(value) {
+        localComparePosition = clamp(Number(value), 0, 100);
+        const rightInset = 100 - localComparePosition;
+        els.localCompareImage2.style.clipPath = `inset(0 ${rightInset}% 0 0)`;
+        els.localCompareBar.style.left = `${localComparePosition}%`;
+        els.localCompareKnob.style.left = `${localComparePosition}%`;
+        els.localCompareDrag.style.left = `${localComparePosition}%`;
+        els.localCompareDrag.setAttribute("aria-valuenow", String(Math.round(localComparePosition)));
+      }
+
+      function setLocalCompareMode(mode) {
+        if (!localCompareReady()) return;
+        localCompareMode = mode;
+        const split = mode === "split";
+        els.localCompareBar.hidden = !split;
+        els.localCompareKnob.hidden = !split;
+        els.localCompareDrag.hidden = !split;
+        els.localModeImage1.setAttribute("aria-pressed", String(mode === "image1"));
+        els.localModeSplit.setAttribute("aria-pressed", String(split));
+        els.localModeImage2.setAttribute("aria-pressed", String(mode === "image2"));
+        els.localLabel1.style.opacity = mode === "image2" ? "0.42" : "1";
+        els.localLabel2.style.opacity = mode === "image1" ? "0.42" : "1";
+
+        if (mode === "image1") {
+          els.localCompareImage2.style.clipPath = "inset(0 100% 0 0)";
+        } else if (mode === "image2") {
+          els.localCompareImage2.style.clipPath = "inset(0 0 0 0)";
+        } else {
+          applyLocalComparePosition(localComparePosition);
+        }
+      }
+
+      function renderLocalCompare() {
+        const ready = localCompareReady();
+        const count = Number(Boolean(localImages[1].url)) + Number(Boolean(localImages[2].url));
+        els.localCompareCanvas.hidden = !ready;
+        els.localEmptyState.hidden = ready;
+        els.localResetButton.disabled = count === 0;
+        [els.localModeImage1, els.localModeSplit, els.localModeImage2].forEach((button) => {
+          button.disabled = !ready;
+        });
+        if (!ready) {
+          const hasError = localImages[1].error || localImages[2].error;
+          els.localEmptyState.textContent = hasError
+            ? "Una delle immagini non può essere letta. Sceglila di nuovo."
+            : count === 2
+              ? "Caricamento immagini..."
+              : count === 1
+                ? "Carica anche la seconda immagine per iniziare il confronto."
+                : "Carica Immagine 1 e Immagine 2 per iniziare il confronto.";
+          return;
+        }
+        setLocalCompareMode(localCompareMode);
+      }
+
+      function positionFromLocalPointer(event) {
+        const rect = els.localCompareCanvas.getBoundingClientRect();
+        if (!rect.width) return localComparePosition;
+        return clamp(((event.clientX - rect.left) / rect.width) * 100, 0, 100);
+      }
+
+      function attachLocalCompareDrag() {
+        let dragging = false;
+        const move = (event) => {
+          if (!dragging) return;
+          event.preventDefault();
+          applyLocalComparePosition(positionFromLocalPointer(event));
+        };
+        const stop = () => {
+          dragging = false;
+          els.localCompareDrag.classList.remove("dragging");
+          window.removeEventListener("pointermove", move);
+          window.removeEventListener("pointerup", stop);
+          window.removeEventListener("pointercancel", stop);
+        };
+
+        els.localCompareDrag.addEventListener("pointerdown", (event) => {
+          if (!localCompareReady()) return;
+          event.preventDefault();
+          event.stopPropagation();
+          dragging = true;
+          localCompareMode = "split";
+          els.localCompareDrag.classList.add("dragging");
+          applyLocalComparePosition(positionFromLocalPointer(event));
+          window.addEventListener("pointermove", move);
+          window.addEventListener("pointerup", stop);
+          window.addEventListener("pointercancel", stop);
+        });
+        els.localCompareDrag.addEventListener("keydown", (event) => {
+          if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+          event.preventDefault();
+          event.stopPropagation();
+          const delta = event.key === "ArrowLeft" ? -2 : 2;
+          applyLocalComparePosition(localComparePosition + delta);
+        });
+      }
+
+      function attachLocalDropTarget(picker, slot) {
+        ["dragenter", "dragover"].forEach((name) => {
+          picker.addEventListener(name, (event) => {
+            event.preventDefault();
+            picker.classList.add("drag-over");
+          });
+        });
+        ["dragleave", "drop"].forEach((name) => {
+          picker.addEventListener(name, (event) => {
+            event.preventDefault();
+            picker.classList.remove("drag-over");
+          });
+        });
+        picker.addEventListener("drop", (event) => {
+          const file = event.dataTransfer?.files?.[0];
+          if (file) setLocalFile(slot, file);
+        });
       }
 
       function scoreValue(value) {
@@ -3426,6 +4266,22 @@
           .replace(/'/g, "&#039;");
       }
 
+      els.openRatingTool.addEventListener("click", () => openTool("rating"));
+      els.openLocalCompareTool.addEventListener("click", () => openTool("local-compare"));
+      els.ratingMenuButton.addEventListener("click", showToolMenu);
+      els.compareMenuButton.addEventListener("click", showToolMenu);
+      els.localFile1.addEventListener("change", (event) => setLocalFile(1, event.target.files?.[0]));
+      els.localFile2.addEventListener("change", (event) => setLocalFile(2, event.target.files?.[0]));
+      els.localResetButton.addEventListener("click", resetLocalImages);
+      els.localModeImage1.addEventListener("click", () => setLocalCompareMode("image1"));
+      els.localModeSplit.addEventListener("click", () => setLocalCompareMode("split"));
+      els.localModeImage2.addEventListener("click", () => setLocalCompareMode("image2"));
+      els.localShowImage1.addEventListener("click", () => setLocalCompareMode("image1"));
+      els.localShowImage2.addEventListener("click", () => setLocalCompareMode("image2"));
+      attachLocalDropTarget(els.localPicker1, 1);
+      attachLocalDropTarget(els.localPicker2, 2);
+      attachLocalCompareDrag();
+
       els.reviewTab.addEventListener("click", () => setView("review"));
       els.finalTab.addEventListener("click", () => {
         const pending = firstPendingSubject();
@@ -3536,6 +4392,23 @@
         const target = event.target;
         const typing = target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) && target.type !== "range";
         if (typing) return;
+        if (!els.localCompareView.hidden && localCompareReady()) {
+          if (event.key === "ArrowLeft") {
+            event.preventDefault();
+            setLocalCompareMode("image1");
+            return;
+          }
+          if (event.key === "ArrowRight") {
+            event.preventDefault();
+            setLocalCompareMode("image2");
+            return;
+          }
+          if (event.key === " " || event.code === "Space") {
+            event.preventDefault();
+            setLocalCompareMode("split");
+            return;
+          }
+        }
         if (!els.reviewView.hidden && event.key === "ArrowLeft") {
           event.preventDefault();
           goPrevious();
@@ -3560,16 +4433,14 @@
         }
       });
       window.addEventListener("beforeunload", () => {
-        saveState();
+        if (ratingStarted) saveState();
+        [1, 2].forEach((slot) => {
+          if (localImages[slot].url) URL.revokeObjectURL(localImages[slot].url);
+        });
       });
 
-      renderReview();
-      startRemoteSync();
-      if (location.hash === "#compare") {
-        state.compareMode = true;
-        renderReview();
-      }
-      if (location.hash === "#confronto") setView("final");
+      renderLocalCompare();
+      showToolMenu();
     })();
   </script>
 </body>
