@@ -1632,9 +1632,42 @@
     .local-viewer {
       min-width: 0;
       min-height: 0;
+      position: relative;
       display: grid;
       grid-template-rows: minmax(0, 1fr) auto;
       gap: 10px;
+    }
+
+    .local-viewer:fullscreen {
+      width: 100vw;
+      height: 100vh;
+      padding: 0;
+      gap: 0;
+      background: #040506;
+    }
+
+    .local-viewer:fullscreen .local-compare-stage {
+      min-height: 0;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .local-viewer:fullscreen .local-mode-controls {
+      position: absolute;
+      left: 50%;
+      bottom: 16px;
+      z-index: 8;
+      width: min(880px, calc(100vw - 32px));
+      transform: translateX(-50%);
+      border-color: rgba(255, 255, 255, 0.2);
+      background: rgba(16, 20, 25, 0.84);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .local-viewer:fullscreen .local-compare-canvas {
+      padding-bottom: 0;
     }
 
     .local-compare-stage {
@@ -1717,7 +1750,7 @@
 
     .local-mode-controls {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 8px;
       padding: 10px;
       border: 1px solid var(--line);
@@ -1734,6 +1767,11 @@
       border-color: var(--accent);
       background: rgba(240, 184, 90, 0.16);
       color: #ffe1aa;
+    }
+
+    .local-fullscreen-button {
+      border-color: rgba(115, 203, 194, 0.55);
+      color: #cefffa;
     }
 
     .local-key-hint {
@@ -1855,6 +1893,19 @@
 
       .local-mode-controls .split-control {
         grid-row: 1;
+      }
+
+      .local-fullscreen-button {
+        grid-column: 1 / -1;
+      }
+
+      .local-viewer:fullscreen .local-mode-controls {
+        bottom: 8px;
+        width: calc(100vw - 16px);
+      }
+
+      .local-viewer:fullscreen .local-key-hint {
+        display: none;
       }
     }
   </style>
@@ -2109,7 +2160,7 @@
         <p class="local-privacy-note">Le immagini non vengono caricate su GitHub, non entrano nella sincronizzazione e vengono eliminate dalla pagina quando le rimuovi o la chiudi.</p>
       </aside>
 
-      <section class="local-viewer" aria-label="Visualizzatore di confronto">
+      <section class="local-viewer" id="localViewer" aria-label="Visualizzatore di confronto">
         <div class="local-compare-stage" id="localCompareStage">
           <div class="local-empty-state" id="localEmptyState">Carica Immagine 1 e Immagine 2 per iniziare il confronto.</div>
           <div class="local-compare-canvas" id="localCompareCanvas" hidden>
@@ -2129,7 +2180,8 @@
           <button id="localModeImage1" type="button" aria-pressed="false">← Immagine 1</button>
           <button class="split-control primary-button" id="localModeSplit" type="button" aria-pressed="true">↔ Barra di confronto</button>
           <button id="localModeImage2" type="button" aria-pressed="false">Immagine 2 →</button>
-          <span class="local-key-hint">Tastiera: ← mostra Immagine 1 · → mostra Immagine 2 · spazio torna alla barra</span>
+          <button class="local-fullscreen-button" id="localFullscreenButton" type="button" aria-pressed="false">⛶ Schermo intero</button>
+          <span class="local-key-hint">Tastiera: ← Immagine 1 · → Immagine 2 · spazio barra · F schermo intero · Esc esci</span>
         </div>
       </section>
     </div>
@@ -2302,6 +2354,7 @@
         localMeta1: document.getElementById("localMeta1"),
         localMeta2: document.getElementById("localMeta2"),
         localEmptyState: document.getElementById("localEmptyState"),
+        localViewer: document.getElementById("localViewer"),
         localCompareCanvas: document.getElementById("localCompareCanvas"),
         localCompareImage1: document.getElementById("localCompareImage1"),
         localCompareImage2: document.getElementById("localCompareImage2"),
@@ -2315,6 +2368,7 @@
         localModeImage1: document.getElementById("localModeImage1"),
         localModeSplit: document.getElementById("localModeSplit"),
         localModeImage2: document.getElementById("localModeImage2"),
+        localFullscreenButton: document.getElementById("localFullscreenButton"),
       };
 
       let state = loadState();
@@ -2733,6 +2787,9 @@
         activeTool = "menu";
         pauseRemoteSync();
         if (!els.overlay.hidden) closeOverlay();
+        if (document.fullscreenElement === els.localViewer) {
+          document.exitFullscreen().catch(() => {});
+        }
         if (leavingLocalCompare) resetLocalImages();
         document.body.classList.remove("final-mode");
         els.ratingApp.hidden = true;
@@ -2835,6 +2892,29 @@
         return Boolean(localImages[1].loaded && localImages[2].loaded);
       }
 
+      function localFullscreenActive() {
+        return document.fullscreenElement === els.localViewer;
+      }
+
+      function updateLocalFullscreenControl() {
+        const active = localFullscreenActive();
+        els.localFullscreenButton.setAttribute("aria-pressed", String(active));
+        els.localFullscreenButton.textContent = active ? "⛶ Esci da schermo intero" : "⛶ Schermo intero";
+      }
+
+      async function toggleLocalFullscreen() {
+        if (!localCompareReady()) return;
+        try {
+          if (localFullscreenActive()) {
+            await document.exitFullscreen();
+          } else {
+            await els.localViewer.requestFullscreen();
+          }
+        } catch (error) {
+          els.localFullscreenButton.textContent = "Schermo intero non disponibile";
+        }
+      }
+
       function applyLocalComparePosition(value) {
         localComparePosition = clamp(Number(value), 0, 100);
         const rightInset = 100 - localComparePosition;
@@ -2876,6 +2956,8 @@
         [els.localModeImage1, els.localModeSplit, els.localModeImage2].forEach((button) => {
           button.disabled = !ready;
         });
+        els.localFullscreenButton.disabled = !ready || !document.fullscreenEnabled;
+        updateLocalFullscreenControl();
         if (!ready) {
           const hasError = localImages[1].error || localImages[2].error;
           els.localEmptyState.textContent = hasError
@@ -4276,11 +4358,13 @@
       els.localModeImage1.addEventListener("click", () => setLocalCompareMode("image1"));
       els.localModeSplit.addEventListener("click", () => setLocalCompareMode("split"));
       els.localModeImage2.addEventListener("click", () => setLocalCompareMode("image2"));
+      els.localFullscreenButton.addEventListener("click", toggleLocalFullscreen);
       els.localShowImage1.addEventListener("click", () => setLocalCompareMode("image1"));
       els.localShowImage2.addEventListener("click", () => setLocalCompareMode("image2"));
       attachLocalDropTarget(els.localPicker1, 1);
       attachLocalDropTarget(els.localPicker2, 2);
       attachLocalCompareDrag();
+      document.addEventListener("fullscreenchange", updateLocalFullscreenControl);
 
       els.reviewTab.addEventListener("click", () => setView("review"));
       els.finalTab.addEventListener("click", () => {
@@ -4393,6 +4477,11 @@
         const typing = target && ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) && target.type !== "range";
         if (typing) return;
         if (!els.localCompareView.hidden && localCompareReady()) {
+          if (event.key.toLowerCase() === "f") {
+            event.preventDefault();
+            toggleLocalFullscreen();
+            return;
+          }
           if (event.key === "ArrowLeft") {
             event.preventDefault();
             setLocalCompareMode("image1");
