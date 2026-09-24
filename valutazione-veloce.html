@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
+    <title>Valutazione veloce · QUBLY Tools</title>
+    <link rel="stylesheet" href="./valutazione-veloce.css" />
+    <script src="./valutazione-veloce.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <a href="./index.html" aria-label="Torna agli strumenti QUBLY"
+          >QB <span>← Strumenti</span></a
+        >
+        <div>
+          <h1>Valutazione veloce</h1>
+          <p>Una cartella. Un’immagine alla volta.</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="importButton" type="button">Importa voti</button>
+        <button id="filesButton" type="button">Apri immagini</button>
+        <button id="folderButton" class="primary" type="button">
+          Apri cartella
+        </button>
+      </div>
+      <input
+        id="folderInput"
+        type="file"
+        accept="image/*"
+        webkitdirectory
+        multiple
+        hidden
+      />
+      <input id="filesInput" type="file" accept="image/*" multiple hidden />
+      <input
+        id="importInput"
+        type="file"
+        accept=".json,application/json"
+        hidden
+      />
+    </header>
+    <p class="notice" id="notice" role="status" aria-live="polite" hidden></p>
+    <p class="storage-warning" id="storageWarning" role="alert" hidden></p>
+    <main class="workspace" id="workspace">
+      <section class="viewer" aria-label="Immagine da valutare">
+        <header class="image-heading">
+          <div class="filename-wrap">
+            <span class="eyebrow" id="collection">ANTEPRIMA LOCALE</span>
+            <h2 id="filename">Le tue immagini, a tutto spazio.</h2>
+            <p id="fileMeta">Apri una cartella per iniziare la revisione.</p>
+          </div>
+          <span class="counter" id="counter">0 / 0</span>
+        </header>
+        <div class="stage" id="stage">
+          <div class="empty-state" id="emptyState">
+            <span class="empty-icon" aria-hidden="true">▧</span>
+            <h2>Fai spazio alle immagini.</h2>
+            <p>
+              Apri una cartella, anche con 100 o più immagini.<br />Esamina,
+              assegna un voto e passa alla prossima.
+            </p>
+            <button class="primary" id="emptyFolderButton" type="button">
+              Scegli una cartella</button
+            ><small
+              >Le immagini restano sul tuo computer.<br />Qui si salvano
+              soltanto le valutazioni.</small
+            >
+          </div>
+          <img id="preview" alt="" draggable="false" hidden />
+          <p class="image-error" id="imageError" role="status" hidden>
+            Impossibile visualizzare questa immagine. Il file potrebbe essere
+            danneggiato o in un formato non supportato dal browser. Puoi
+            comunque valutarlo o passare al successivo.
+          </p>
+          <button
+            class="stage-arrow previous"
+            id="previous"
+            type="button"
+            aria-label="Immagine precedente"
+            disabled
+          >
+            ‹
+          </button>
+          <button
+            class="stage-arrow next"
+            id="next"
+            type="button"
+            aria-label="Immagine successiva"
+            disabled
+          >
+            ›
+          </button>
+        </div>
+        <footer class="viewer-toolbar">
+          <div class="zoom-controls">
+            <button
+              id="zoomOut"
+              type="button"
+              aria-label="Riduci zoom"
+              disabled
+            >
+              −</button
+            ><button id="fit" type="button" disabled>Adatta</button
+            ><button id="actualSize" type="button" disabled>100%</button
+            ><button
+              id="zoomIn"
+              type="button"
+              aria-label="Aumenta zoom"
+              disabled
+            >
+              +</button
+            ><span id="zoomLabel">Adatta</span>
+          </div>
+          <button id="fullscreen" type="button">⛶ Schermo intero</button>
+        </footer>
+      </section>
+      <aside class="review-panel" aria-label="Valutazione e riepilogo">
+        <div class="progress-section">
+          <div class="section-heading">
+            <h2>La tua revisione</h2>
+            <span id="progressText">0 di 0</span>
+          </div>
+          <progress
+            id="progress"
+            value="0"
+            max="1"
+            aria-label="Immagini valutate"
+          ></progress>
+          <p id="summary">In attesa di immagini</p>
+        </div>
+        <div class="file-picker">
+          <label for="jump">Vai all’immagine</label
+          ><select id="jump" disabled>
+            <option>Nessuna immagine</option></select
+          ><button id="nextPending" type="button" disabled>
+            Prossima da valutare →
+          </button>
+        </div>
+        <fieldset id="reviewFields" disabled>
+          <legend>01 <span>Esito</span></legend>
+          <div
+            class="status-options"
+            role="group"
+            aria-label="Esito dell’immagine"
+          >
+            <button type="button" data-status="confirmed" aria-pressed="false">
+              <span>✓</span> Confermata <kbd>C</kbd></button
+            ><button type="button" data-status="edit" aria-pressed="false">
+              <span>✎</span> Da modificare <kbd>M</kbd></button
+            ><button type="button" data-status="discarded" aria-pressed="false">
+              <span>×</span> Da scartare <kbd>X</kbd>
+            </button>
+          </div>
+          <div class="score-heading">
+            <label for="score">02 <span>Valutazione</span></label>
+            <div>
+              <input
+                id="score"
+                type="number"
+                min="1"
+                max="100"
+                step="1"
+                placeholder="—"
+                inputmode="numeric"
+                aria-describedby="scoreHint"
+              /><span>/ 100</span>
+            </div>
+          </div>
+          <input
+            id="scoreRange"
+            type="range"
+            min="1"
+            max="100"
+            value="50"
+            aria-label="Voto da 1 a 100"
+          />
+          <div class="range-labels">
+            <span>1 · Minimo</span><span>100 · Massimo</span>
+          </div>
+          <p id="scoreHint" class="hint">Scegli un voto da 1 a 100.</p>
+          <label class="comment-label" for="comment"
+            >03 <span>Commento</span><small>facoltativo</small></label
+          ><textarea
+            id="comment"
+            rows="3"
+            maxlength="10000"
+            placeholder="Cosa funziona? Cosa cambieresti?"
+          ></textarea>
+          <button class="primary save-next" id="saveNext" type="button">
+            Salva e successiva →
+          </button>
+        </fieldset>
+        <p id="saveState" class="save-state" role="status">
+          I voti si salvano automaticamente.
+        </p>
+        <div class="export-section">
+          <button id="exportCsv" type="button" disabled>
+            ↓ Esporta riepilogo CSV</button
+          ><button id="exportJson" class="text-button" type="button" disabled>
+            Scarica backup dei voti (JSON)
+          </button>
+          <p>
+            Stesso nome file, stessa valutazione: i voti vengono ritrovati in
+            questo browser. Usa il backup per trasferirli o recuperarli.
+          </p>
+        </div>
+        <p class="keyboard-hint">
+          <kbd>←</kbd> <kbd>→</kbd> cambia immagine · <kbd>Invio</kbd> salva e
+          avanti<br />Rotellina: zoom · trascina: sposta · doppio clic: adatta
+        </p>
+      </aside>
+    </main>
+  </body>
+</html>

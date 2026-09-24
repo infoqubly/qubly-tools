@@ -1414,7 +1414,7 @@
 
     .tool-choice-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 16px;
     }
 
@@ -1427,6 +1427,9 @@
       align-items: start;
       border-radius: 14px;
       text-align: left;
+      text-decoration: none;
+      color: var(--text);
+      border: 1px solid var(--line);
       background: linear-gradient(150deg, rgba(32, 39, 49, 0.98), rgba(16, 21, 27, 0.98));
       box-shadow: var(--shadow);
     }
@@ -1933,6 +1936,12 @@
           <p>Carica due immagini dal computer e confrontale con la barra oppure alternandole all’istante.</p>
           <span class="tool-choice-cta">Apri confronto →</span>
         </button>
+        <a class="tool-choice" href="./valutazione-veloce.html">
+          <span class="tool-choice-icon" aria-hidden="true">✓</span>
+          <h2>Valutazione veloce</h2>
+          <p>Apri una cartella locale, valuta le immagini una alla volta ed esporta esiti, voti e commenti.</p>
+          <span class="tool-choice-cta">Inizia revisione →</span>
+        </a>
       </div>
     </div>
   </section>
