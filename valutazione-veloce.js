@@ -292,8 +292,8 @@
     $("filename").textContent = file.name;
     $("filename").title = file.name;
     $("collection").textContent =
-      file.webkitRelativePath?.split("/")[0] || "IMMAGINI LOCALI";
-    const path = file.webkitRelativePath || file.name;
+      QublyLocalDrop.relativePath(file).split("/")[0] || "IMMAGINI LOCALI";
+    const path = QublyLocalDrop.relativePath(file);
     $("fileMeta").textContent =
       `${path} · ${(file.size / 1024 / 1024).toLocaleString("it-IT", { maximumFractionDigits: 2 })} MB`;
     $("counter").textContent = `${index + 1} / ${files.length}`;
@@ -350,7 +350,7 @@
     $("preview").src = imageUrl;
   }
 
-  function loadFiles(selected) {
+  function loadFiles(selected, append = false) {
     const images = [...selected].filter(
       (file) =>
         file.type.startsWith("image/") ||
@@ -364,10 +364,16 @@
       );
       return;
     }
-    files = images.sort(
+    const collection = append ? [...files, ...images] : images;
+    const unique = new Map(
+      collection.map((file) => [QublyLocalDrop.relativePath(file), file]),
+    );
+    files = [...unique.values()].sort(
       (a, b) =>
         a.name.localeCompare(b.name, "it", { numeric: true }) ||
-        (a.webkitRelativePath || "").localeCompare(b.webkitRelativePath || ""),
+        QublyLocalDrop.relativePath(a).localeCompare(
+          QublyLocalDrop.relativePath(b),
+        ),
     );
     index = 0;
     const fragment = document.createDocumentFragment();
@@ -453,7 +459,7 @@
       const record = records.get(file.name);
       rows.push([
         file.name,
-        file.webkitRelativePath || file.name,
+        QublyLocalDrop.relativePath(file),
         statuses[record?.status] || "Da valutare",
         record?.score ?? "",
         record?.comment || "",
@@ -564,6 +570,10 @@
       event.target.value = ""; // Allow choosing the same folder again.
     }),
   );
+  QublyLocalDrop.attach({
+    onFiles: (files) => loadFiles(files, true),
+    onError: notify,
+  });
   statusButtons.forEach((button) =>
     button.addEventListener("click", () => selectStatus(button.dataset.status)),
   );

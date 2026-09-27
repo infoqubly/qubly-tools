@@ -37,7 +37,7 @@
   const imageFile = (file) =>
     file.type.startsWith("image/") ||
     /\.(png|jpe?g|webp|avif|gif|bmp|svg|ico|heic|heif|tiff?)$/i.test(file.name);
-  const keyOf = (file) => file.webkitRelativePath || file.name;
+  const keyOf = (file) => QublyLocalDrop.relativePath(file);
   const nameOf = (list, id) => list.find((item) => item.id === id)?.name || "—";
   const assignment = (key) => state.assignments[key] || {};
   const ready = (key) => {
@@ -90,7 +90,7 @@
     urls.clear();
   }
 
-  function openFiles(list) {
+  function openFiles(list, append = false) {
     const images = [...list].filter(imageFile);
     if (!images.length) {
       notify(
@@ -98,13 +98,14 @@
       );
       return;
     }
+    const collection = append ? [...loaded.values(), ...images] : images;
     clearUrls();
     loaded.clear();
     selected.clear();
-    images
+    collection
       .sort((a, b) => keyOf(a).localeCompare(keyOf(b), "it", { numeric: true }))
       .forEach((file) => loaded.set(keyOf(file), file));
-    const duplicateCount = images.length - loaded.size;
+    const duplicateCount = collection.length - loaded.size;
     $("fileCount").textContent = `${loaded.size} immagini`;
     notify(
       `${loaded.size} immagini aperte.${duplicateCount ? ` ${duplicateCount} nomi duplicati condividono la stessa assegnazione.` : ""} Le immagini restano sul computer.`,
@@ -616,6 +617,10 @@
       if (event.target.files.length) openFiles(event.target.files);
       event.target.value = "";
     });
+  QublyLocalDrop.attach({
+    onFiles: (files) => openFiles(files, true),
+    onError: notify,
+  });
   $("subjectForm").addEventListener("submit", (event) => {
     event.preventDefault();
     addCategory("subject", $("subjectName").value);

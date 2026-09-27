@@ -2139,7 +2139,7 @@
       <aside class="local-file-panel" aria-label="Selezione immagini locali">
         <div class="local-file-intro">
           <strong>Scegli due immagini</strong>
-          <span>Puoi cliccare oppure trascinare un file in ciascun riquadro.</span>
+          <span>Trascina qui due immagini o una cartella, oppure scegli i file dal computer.</span>
         </div>
 
         <label class="local-file-picker" id="localPicker1" for="localFile1">
@@ -2228,6 +2228,7 @@
 
   <script src="./manifest.js"></script>
   <script src="./sync-config.js"></script>
+  <script src="./local-drop.js"></script>
   <script>
     (() => {
       const manifest = window.RENDER_REVIEW_MANIFEST;
@@ -2844,7 +2845,7 @@
 
       function setLocalFile(slot, file) {
         const view = localElements(slot);
-        if (!file || !String(file.type || "").startsWith("image/")) {
+        if (!file || !(String(file.type || "").startsWith("image/") || /\.(png|jpe?g|webp|avif|gif|bmp|svg|ico|heic|heif|tiff?)$/i.test(file.name))) {
           view.meta.textContent = "Seleziona un file immagine valido";
           return;
         }
@@ -4369,8 +4370,23 @@
       els.localFullscreenButton.addEventListener("click", toggleLocalFullscreen);
       els.localShowImage1.addEventListener("click", () => setLocalCompareMode("image1"));
       els.localShowImage2.addEventListener("click", () => setLocalCompareMode("image2"));
-      attachLocalDropTarget(els.localPicker1, 1);
-      attachLocalDropTarget(els.localPicker2, 2);
+      QublyLocalDrop.attach({
+        enabled: () => activeTool === "local-compare",
+        onError: (message) => { els.localEmptyState.textContent = message; },
+        onFiles: (files, target) => {
+          const images = files.filter((file) => String(file.type || "").startsWith("image/") || /\.(png|jpe?g|webp|avif|gif|bmp|svg|ico|heic|heif|tiff?)$/i.test(file.name));
+          if (!images.length) { els.localEmptyState.textContent = "Nessuna immagine trovata nella selezione."; return; }
+          images.sort((a, b) => QublyLocalDrop.relativePath(a).localeCompare(QublyLocalDrop.relativePath(b), "it", { numeric: true }));
+          if (images.length === 1) {
+            const slot = target?.closest?.("#localPicker2") ? 2 : target?.closest?.("#localPicker1") ? 1 : !localImages[1].file ? 1 : !localImages[2].file ? 2 : 1;
+            setLocalFile(slot, images[0]);
+          } else {
+            setLocalFile(1, images[0]);
+            setLocalFile(2, images[1]);
+            if (images.length > 2) document.querySelector(".local-file-intro span").textContent = `Confronto delle prime due immagini su ${images.length} trovate. Trascina altri file per sostituirle.`;
+          }
+        },
+      });
       attachLocalCompareDrag();
       document.addEventListener("fullscreenchange", updateLocalFullscreenControl);
 
