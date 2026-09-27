@@ -1923,12 +1923,12 @@
       </div>
 
       <div class="tool-choice-grid">
-        <button class="tool-choice" id="openRatingTool" type="button">
+        <a class="tool-choice" id="openRatingTool" href="./valutazione-prompt.html">
           <span class="tool-choice-icon" aria-hidden="true">★</span>
           <h2>Valutazione render</h2>
-          <p>Apri lo strumento esistente con immagini, voti, classifiche e sincronizzazione condivisa.</p>
+          <p>Carica le tue immagini, organizza soggetti e modelli di prompt, vota e confronta le classifiche.</p>
           <span class="tool-choice-cta">Apri valutazione →</span>
-        </button>
+        </a>
 
         <button class="tool-choice" id="openLocalCompareTool" type="button">
           <span class="tool-choice-icon" aria-hidden="true">↔</span>
@@ -2234,7 +2234,7 @@
       const main = document.getElementById("appMain");
 
       if (!manifest || !Array.isArray(manifest.variants)) {
-        main.innerHTML = '<div class="fatal">Manifest non trovato. Rigenera i file con <code>python build_manifest.py</code>.</div>';
+        main.innerHTML = '<div class="fatal">Configurazione degli strumenti non disponibile. Ricarica la pagina.</div>';
         return;
       }
 
@@ -3083,7 +3083,7 @@
             errorBox.className = "image-load-error";
             parent.appendChild(errorBox);
           }
-          errorBox.textContent = "Immagine non caricata. Apri l'app da un URL web pubblicato oppure rendi disponibili offline tutti i file della cartella immagini_valutazione.";
+          errorBox.textContent = "Immagine non caricata. Verifica che il file sia disponibile e in un formato supportato dal browser.";
           errorBox.classList.add("active");
         };
         img.onload = () => {
@@ -4357,7 +4357,6 @@
           .replace(/'/g, "&#039;");
       }
 
-      els.openRatingTool.addEventListener("click", () => openTool("rating"));
       els.openLocalCompareTool.addEventListener("click", () => openTool("local-compare"));
       els.ratingMenuButton.addEventListener("click", showToolMenu);
       els.compareMenuButton.addEventListener("click", showToolMenu);

@@ -17,6 +17,9 @@
     panY = 0,
     drag = null;
   let storageAvailable = true;
+  let summaryFilter = "all";
+  let summaryUrls = [];
+  let summaryRecords = [];
   const validScore = (value) =>
     Number.isInteger(value) && value >= 1 && value <= 100;
   const validRecord = (record) =>
@@ -114,6 +117,106 @@
     );
     $("exportCsv").disabled = !files.length;
     $("exportJson").disabled = !records.size;
+    if (!$("summaryPage").hidden) renderSummary();
+  }
+
+  function renderSummary() {
+    summaryUrls.forEach((url) => URL.revokeObjectURL(url));
+    summaryUrls = [];
+    const threshold = Number($("minimumScore").value);
+    const minimum = Number.isFinite(threshold)
+      ? Math.max(0, Math.min(99, threshold))
+      : 0;
+    const visible = [...records.values()]
+      .filter(
+        (record) =>
+          complete(record) &&
+          record.score > minimum &&
+          (summaryFilter === "all" || record.status === summaryFilter),
+      )
+      .sort(
+        (a, b) =>
+          b.score - a.score ||
+          a.filename.localeCompare(b.filename, "it", { numeric: true }),
+      );
+    summaryRecords = visible;
+    $("summaryExport").disabled = !visible.length;
+    $("summaryCount").textContent =
+      `${visible.length} ${visible.length === 1 ? "immagine" : "immagini"} · ordinate dal voto più alto`;
+    const list = $("summaryList");
+    list.replaceChildren();
+    if (!visible.length) {
+      const empty = document.createElement("p");
+      empty.className = "summary-empty";
+      empty.textContent = records.size
+        ? "Nessuna immagine corrisponde ai filtri. Cambia esito o soglia del voto."
+        : "Non ci sono ancora immagini valutate. Apri una cartella e inizia la revisione.";
+      list.append(empty);
+      return;
+    }
+    const fileIndex = new Map(
+      files.map((file, position) => [file.name, { file, position }]),
+    );
+    const fragment = document.createDocumentFragment();
+    visible.forEach((record, position) => {
+      const loaded = fileIndex.get(record.filename);
+      const row = document.createElement(loaded ? "button" : "div");
+      row.className = "summary-row";
+      if (loaded) {
+        row.type = "button";
+        row.title = "Apri questa immagine nella revisione";
+        row.addEventListener("click", () => {
+          index = loaded.position;
+          showPage("review");
+          renderImage();
+        });
+      }
+      const rank = document.createElement("span");
+      rank.className = "summary-rank";
+      rank.textContent = `${position + 1}.`;
+      const thumb = document.createElement("span");
+      thumb.className = "summary-thumb";
+      if (loaded) {
+        const image = document.createElement("img");
+        const url = URL.createObjectURL(loaded.file);
+        summaryUrls.push(url);
+        image.src = url;
+        image.loading = "lazy";
+        image.alt = "";
+        thumb.append(image);
+      } else thumb.textContent = "▧";
+      const detail = document.createElement("span");
+      detail.className = "summary-detail";
+      const name = document.createElement("strong");
+      name.textContent = record.filename;
+      const note = document.createElement("small");
+      note.textContent =
+        record.comment ||
+        (loaded
+          ? "Apri per vedere o modificare il voto"
+          : "Riapri la cartella per vedere l’immagine");
+      detail.append(name, note);
+      const status = document.createElement("span");
+      status.className = `summary-status status-${record.status}`;
+      status.textContent = statuses[record.status];
+      const score = document.createElement("strong");
+      score.className = "summary-score";
+      score.textContent = `${record.score}`;
+      row.append(rank, thumb, detail, status, score);
+      fragment.append(row);
+    });
+    list.append(fragment);
+  }
+
+  function showPage(view) {
+    const summary = view === "summary";
+    if (summary && document.fullscreenElement) document.exitFullscreen();
+    $("workspace").hidden = summary;
+    $("summaryPage").hidden = !summary;
+    $("reviewViewButton").setAttribute("aria-pressed", String(!summary));
+    $("summaryViewButton").setAttribute("aria-pressed", String(summary));
+    if (summary) renderSummary();
+    else fit();
   }
 
   function save(patch) {
@@ -367,6 +470,45 @@
   $("exportJson").addEventListener("click", () =>
     download(JSON.stringify(archive(), null, 2), "application/json", "json"),
   );
+  $("summaryExport").addEventListener("click", () => {
+    const rows = [
+      [
+        "Nome file",
+        "Esito",
+        "Voto (1-100)",
+        "Commento",
+        "Ultimo aggiornamento",
+      ],
+    ];
+    summaryRecords.forEach((record) =>
+      rows.push([
+        record.filename,
+        statuses[record.status],
+        record.score,
+        record.comment,
+        record.updatedAt,
+      ]),
+    );
+    download(
+      "\uFEFF" + rows.map((row) => row.map(csvCell).join(";")).join("\r\n"),
+      "text/csv;charset=utf-8",
+      "csv",
+    );
+  });
+  $("reviewViewButton").addEventListener("click", () => showPage("review"));
+  $("summaryViewButton").addEventListener("click", () => showPage("summary"));
+  document.querySelectorAll("[data-summary-status]").forEach((button) =>
+    button.addEventListener("click", () => {
+      summaryFilter = button.dataset.summaryStatus;
+      document
+        .querySelectorAll("[data-summary-status]")
+        .forEach((item) =>
+          item.setAttribute("aria-pressed", String(item === button)),
+        );
+      renderSummary();
+    }),
+  );
+  $("minimumScore").addEventListener("input", renderSummary);
   $("importButton").addEventListener("click", () => $("importInput").click());
   $("importInput").addEventListener("change", async (event) => {
     const file = event.target.files[0];
@@ -525,6 +667,7 @@
   });
   window.addEventListener("resize", fit);
   document.addEventListener("keydown", (event) => {
+    if (!$("summaryPage").hidden) return;
     if (!files.length || event.ctrlKey || event.metaKey || event.altKey) return;
     if (
       event.key === "Enter" &&

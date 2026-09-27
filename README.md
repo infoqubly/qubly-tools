@@ -1,31 +1,29 @@
-# QUBLY Valutazione Render
+# QUBLY Tools
 
-Tool interno per valutare render da piu' PC.
+Tre strumenti per lavorare con immagini nel browser. Le immagini selezionate dal computer restano locali: non vengono caricate sul sito. Le valutazioni e le categorie sono salvate nel browser, sullo stesso indirizzo web; per spostarle su un altro browser o conservarne una copia usa i file JSON esportabili.
 
-- Le immagini sono mantenute in qualita' originale.
-- I voti si sincronizzano tramite Google Sheets e Google Apps Script.
-- L'interfaccia include zoom fullscreen con rotellina mouse, trascinamento e doppio click per reset.
-- Il sito e' marcato `noindex` e `nofollow`; resta comunque raggiungibile da chi conosce l'URL.
+## Valutazione render
 
-## Uso
+Apri **Valutazione render** dal menu Tools. Il repository non contiene più la vecchia raccolta fissa di originali e varianti.
 
-Apri il link GitHub Pages del repository, seleziona il votante corretto e vota normalmente.
+1. Apri una cartella (anche con sottocartelle) o più immagini. Dopo un riavvio o su un altro PC, apri di nuovo la stessa raccolta per ricollegare le immagini alle categorie e ai voti.
+2. In **Organizza**, crea i nomi dei soggetti e dei modelli di prompt. Seleziona una o più righe e clicca un nome per assegnarlo in blocco. Lo stesso modello si applica alle immagini di più soggetti. L'icona della matita rinomina un soggetto o modello senza perdere le assegnazioni.
+3. Per ciascun soggetto, assegna un'immagine come **Originale**. Alle varianti assegna un modello di prompt. Il filtro “Da organizzare” mostra ciò che manca.
+4. In **Valuta**, scegli il soggetto, confronta originale e variante e assegna a ogni variante un voto intero da 1 a 100, con una nota facoltativa. Sono disponibili più valutatori. I dati vengono salvati automaticamente.
+5. In **Classifica modelli**, confronta la media di ogni modello. Ogni soggetto valutato conta una volta nella media del modello, anche quando contiene più varianti. Puoi esportare la classifica CSV.
 
-## Sync
+**Scarica progetto** esporta soggetti, modelli, assegnazioni, valutatori e voti in JSON; **Importa progetto** li ripristina. Le immagini non sono incluse nel backup. Questa versione usa salvataggio locale e scambio manuale del progetto JSON; la precedente sincronizzazione Google Sheets non è collegata alla nuova raccolta dinamica.
 
-La configurazione della Web App Apps Script e' in `sync-config.js`.
+## Valutazione veloce
 
-## Valutazione veloce di immagini locali
+Apri **Valutazione veloce**, scegli una cartella e scorri le immagini con le frecce. Ogni file può essere **Confermato**, **Da modificare** o **Da scartare**, con voto da 1 a 100 e commento facoltativo. Nome file ed estensione identificano la valutazione: caricando di nuovo un file con lo stesso nome nello stesso browser, il voto viene ritrovato. File con nomi identici condividono quindi il voto, anche se provengono da cartelle diverse.
 
-Dal menu Strumenti apri **Valutazione veloce**, oppure `valutazione-veloce.html`.
+La nuova schermata **Riepilogo** mostra tutte le immagini valutate, incluse quelle di raccolte precedenti. Ordina dal voto più alto e filtra per esito o per voto maggiore di una soglia. Le anteprime compaiono per i file attualmente aperti; cliccando una riga torni alla valutazione. Il riepilogo visibile si esporta in CSV.
 
-- **Apri cartella** include le immagini nelle sottocartelle; **Apri immagini** permette una selezione multipla. Le immagini vengono lette solo localmente e non vengono inviate al server. Viene caricata un'anteprima alla volta, anche per raccolte con oltre 100 file.
-- Usa le frecce sullo schermo o sulla tastiera per navigare. Il menu **Vai all'immagine** e **Prossima da valutare** permettono di riprendere una revisione incompleta.
-- Scegli **Confermata**, **Da modificare** o **Da scartare**, assegna un voto intero da **1 a 100** e aggiungi un commento facoltativo. Tutte le modifiche si salvano automaticamente; **Salva e successiva** richiede sia un esito sia un voto.
-- Il nome file completo (inclusa l'estensione, con distinzione tra maiuscole e minuscole) identifica la valutazione. Riaprendo una cartella nello stesso browser e sullo stesso indirizzo, i voti vengono ritrovati. Nomi identici, anche in cartelle diverse, condividono il voto: l'interfaccia segnala i duplicati.
-- **Esporta riepilogo CSV** esporta tutte le immagini della raccolta corrente, incluse quelle ancora da valutare, con percorso, esito, voto, commento e data. Il CSV usa il separatore punto e virgola e UTF-8 con BOM per Excel.
-- **Scarica backup dei voti (JSON)** conserva tutte le valutazioni memorizzate, anche di raccolte precedenti. **Importa voti** le ripristina su un altro browser/computer; in caso di conflitto viene mantenuta la valutazione più recente. Nessuna immagine è inclusa nei file esportati.
-- La memoria locale del browser può essere cancellata o non essere disponibile: conserva un backup JSON. Un avviso segnala gli errori di salvataggio senza interrompere la revisione.
-- La visualizzazione include adattamento alla finestra, dimensione reale, zoom con rotellina, trascinamento e schermo intero. Le scorciatoie **C**, **M**, **X** scelgono l'esito senza interferire con la scrittura dei commenti.
+**Esporta riepilogo CSV** nella vista Valuta include anche i file ancora da valutare della raccolta corrente. **Scarica backup dei voti (JSON)** e **Importa voti** trasferiscono i voti tra browser e PC. Il CSV usa punto e virgola e UTF-8 con BOM per Excel.
 
-La valutazione veloce è indipendente dalla sincronizzazione Google Sheets dello strumento Valutazione render.
+## Confronto immagini
+
+Carica due immagini locali e confrontale con il cursore o alternandole. Puoi usare lo schermo intero. Nessun file viene salvato sul sito.
+
+Il sito è marcato `noindex` e `nofollow`, ma chi conosce l'URL può aprirlo.

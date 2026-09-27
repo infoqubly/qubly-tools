@@ -20,6 +20,13 @@
         </div>
       </div>
       <div class="actions">
+        <div class="view-switch" role="group" aria-label="Vista">
+          <button id="reviewViewButton" type="button" aria-pressed="true">
+            Valuta</button
+          ><button id="summaryViewButton" type="button" aria-pressed="false">
+            Riepilogo
+          </button>
+        </div>
         <button id="importButton" type="button">Importa voti</button>
         <button id="filesButton" type="button">Apri immagini</button>
         <button id="folderButton" class="primary" type="button">
@@ -213,5 +220,61 @@
         </p>
       </aside>
     </main>
+    <section
+      class="summary-page"
+      id="summaryPage"
+      aria-labelledby="summaryTitle"
+      hidden
+    >
+      <div class="summary-heading">
+        <div>
+          <span class="eyebrow">VALUTAZIONE VELOCE</span>
+          <h2 id="summaryTitle">Immagini valutate</h2>
+          <p id="summaryCount">
+            Tutti i voti salvati, dal più alto al più basso.
+          </p>
+        </div>
+        <button id="summaryExport" type="button">
+          ↓ Esporta risultati visibili
+        </button>
+      </div>
+      <div class="summary-filters">
+        <div class="filter-chips" role="group" aria-label="Filtra per esito">
+          <button type="button" data-summary-status="all" aria-pressed="true">
+            Tutte</button
+          ><button
+            type="button"
+            data-summary-status="confirmed"
+            aria-pressed="false"
+          >
+            Confermate</button
+          ><button
+            type="button"
+            data-summary-status="edit"
+            aria-pressed="false"
+          >
+            Da modificare</button
+          ><button
+            type="button"
+            data-summary-status="discarded"
+            aria-pressed="false"
+          >
+            Scartate
+          </button>
+        </div>
+        <label for="minimumScore"
+          >Voto maggiore di
+          <input
+            id="minimumScore"
+            type="number"
+            min="0"
+            max="99"
+            step="1"
+            value="0"
+            inputmode="numeric"
+        /></label>
+      </div>
+      <div class="summary-list" id="summaryList" aria-live="polite"></div>
+    </section>
   </body>
 </html>

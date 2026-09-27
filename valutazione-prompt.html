@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow,noarchive,nosnippet" />
+    <title>Valutazione render · QUBLY Tools</title>
+    <link rel="stylesheet" href="./valutazione-prompt.css" />
+    <script src="./valutazione-prompt.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="back" href="./index.html">QB <small>← Strumenti</small></a>
+      <div class="heading">
+        <h1>Valutazione render</h1>
+        <p>Trova i modelli di prompt che funzionano meglio.</p>
+      </div>
+      <div class="top-actions">
+        <button id="backupImport" type="button">Importa progetto</button
+        ><button id="backupExport" type="button">Scarica progetto</button
+        ><button id="filesButton" type="button">Apri immagini</button
+        ><button id="folderButton" class="primary" type="button">
+          Apri cartella
+        </button>
+      </div>
+    </header>
+    <input
+      id="folderInput"
+      type="file"
+      accept="image/*"
+      webkitdirectory
+      multiple
+      hidden
+    /><input
+      id="filesInput"
+      type="file"
+      accept="image/*"
+      multiple
+      hidden
+    /><input
+      id="backupInput"
+      type="file"
+      accept=".json,application/json"
+      hidden
+    />
+    <p id="notice" class="notice" role="status" aria-live="polite" hidden></p>
+    <nav class="tabs" aria-label="Schermate">
+      <button type="button" data-tab="organize" aria-pressed="true">
+        01 · Organizza <span id="fileCount">0 immagini</span></button
+      ><button type="button" data-tab="review" aria-pressed="false">
+        02 · Valuta</button
+      ><button type="button" data-tab="ranking" aria-pressed="false">
+        03 · Classifica modelli
+      </button>
+    </nav>
+    <main>
+      <section id="organizeView" class="view organize-view">
+        <div class="intro">
+          <div>
+            <span class="eyebrow">PREPARA LA RACCOLTA</span>
+            <h2>Organizza immagini, soggetti e prompt.</h2>
+            <p>
+              Apri una cartella locale. Seleziona più immagini, poi clicca un
+              soggetto e un modello per assegnarli in blocco. Segna un originale
+              per ogni soggetto.
+            </p>
+          </div>
+          <div class="privacy">
+            Le immagini restano sul computer. Qui si salvano categorie e voti:
+            riapri la stessa cartella per ritrovarli.
+          </div>
+        </div>
+        <div class="organize-grid">
+          <aside class="catalogs">
+            <div class="catalog">
+              <div class="catalog-title">
+                <h3>Soggetti</h3>
+                <small id="subjectCount">0</small>
+              </div>
+              <form id="subjectForm">
+                <input
+                  id="subjectName"
+                  type="text"
+                  maxlength="70"
+                  placeholder="Es. cucina, yacht…"
+                  aria-label="Nuovo soggetto"
+                  required
+                /><button class="primary" type="submit">Aggiungi</button>
+              </form>
+              <div id="subjectChips" class="chips"></div>
+            </div>
+            <div class="catalog">
+              <div class="catalog-title">
+                <h3>Modelli di prompt</h3>
+                <small id="modelCount">0</small>
+              </div>
+              <form id="modelForm">
+                <input
+                  id="modelName"
+                  type="text"
+                  maxlength="70"
+                  placeholder="Es. D5 Norm, Multi Prompt…"
+                  aria-label="Nuovo modello di prompt"
+                  required
+                /><button class="primary" type="submit">Aggiungi</button>
+              </form>
+              <p class="catalog-tip">
+                Lo stesso modello può essere usato su soggetti diversi.
+              </p>
+              <div id="modelChips" class="chips"></div>
+            </div>
+            <div class="catalog helper">
+              <h3>Assegnazione rapida</h3>
+              <p>
+                Seleziona le immagini nell’elenco. Clicca un nome qui sopra per
+                applicarlo a tutte le selezionate. Per l’immagine di partenza
+                scegli “Segna originale”.
+              </p>
+              <button id="makeOriginal" type="button" disabled>
+                ◎ Segna originale</button
+              ><button id="clearAssignment" type="button" disabled>
+                Rimuovi assegnazioni
+              </button>
+            </div>
+          </aside>
+          <div class="file-panel">
+            <div class="file-toolbar">
+              <div>
+                <h3>Immagini della raccolta</h3>
+                <p id="organizeStatus">
+                  Apri una cartella o seleziona immagini per iniziare.
+                </p>
+              </div>
+              <label for="fileSearch"
+                >Cerca
+                <input
+                  id="fileSearch"
+                  type="search"
+                  placeholder="Nome file…" /></label
+              ><label for="fileFilter"
+                >Mostra
+                <select id="fileFilter">
+                  <option value="all">Tutte</option>
+                  <option value="pending">Da organizzare</option>
+                  <option value="ready">Pronte</option>
+                </select></label
+              >
+            </div>
+            <div class="selection-bar">
+              <label
+                ><input id="selectVisible" type="checkbox" /> Seleziona
+                visibili</label
+              ><span id="selectedCount">0 selezionate</span>
+            </div>
+            <div id="fileList" class="file-list"></div>
+          </div>
+        </div>
+      </section>
+      <section id="reviewView" class="view review-view" hidden>
+        <div class="review-head">
+          <div>
+            <span class="eyebrow">VALUTAZIONE PER SOGGETTO</span>
+            <h2>Confronta originale e varianti.</h2>
+            <p>
+              Assegna un voto da 1 a 100 a ogni variante. Le classifiche si
+              aggiornano automaticamente.
+            </p>
+          </div>
+          <div class="reviewer">
+            <label for="voterSelect">Valutatore</label
+            ><select id="voterSelect"></select
+            ><button id="addVoter" type="button">+ Aggiungi</button>
+          </div>
+        </div>
+        <div
+          id="subjectTabs"
+          class="subject-tabs"
+          role="group"
+          aria-label="Soggetti"
+        ></div>
+        <div id="reviewEmpty" class="empty" hidden>
+          Per valutare, apri le immagini e assegna a ciascuna variante un
+          soggetto e un modello di prompt nella schermata “Organizza”.
+        </div>
+        <div id="reviewContent" class="review-content" hidden>
+          <div class="comparison">
+            <figure>
+              <figcaption>
+                ORIGINALE <span id="originalName">—</span>
+              </figcaption>
+              <div class="comparison-image">
+                <img id="originalImage" alt="Immagine originale" />
+                <p id="originalMissing" hidden>
+                  Originale non assegnato a questo soggetto.
+                </p>
+              </div>
+            </figure>
+            <figure>
+              <figcaption>VARIANTE <span id="variantName">—</span></figcaption>
+              <div class="comparison-image">
+                <img id="variantImage" alt="Variante selezionata" />
+              </div>
+            </figure>
+          </div>
+          <aside class="variant-panel">
+            <div class="panel-title">
+              <h3 id="reviewSubject">Varianti</h3>
+              <span id="variantCount">0</span>
+            </div>
+            <div id="variantList" class="variant-list"></div>
+          </aside>
+        </div>
+      </section>
+      <section id="rankingView" class="view ranking-view" hidden>
+        <div class="intro">
+          <div>
+            <span class="eyebrow">RISULTATI</span>
+            <h2>Quale modello di prompt rende meglio?</h2>
+            <p>
+              La media di ogni modello pesa allo stesso modo per ogni soggetto
+              valutato, anche se ha più varianti.
+            </p>
+          </div>
+          <button id="rankingCsv" type="button">
+            ↓ Esporta classifica CSV
+          </button>
+        </div>
+        <div class="ranking-grid">
+          <div class="ranking-panel">
+            <h3>Classifica modelli</h3>
+            <div id="modelRanking"></div>
+          </div>
+          <div class="ranking-panel">
+            <h3>Per soggetto</h3>
+            <div id="subjectRanking"></div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
