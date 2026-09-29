@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://qubly.studio blob:; connect-src 'self' https://qubly.studio; base-uri 'none'; form-action 'none'">
+  <title>Gestione gallerie · QUBLY Tools</title>
+  <link rel="stylesheet" href="./gallery-tool.css?v=3">
+  <script src="./gallery-tool.js?v=3" defer></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="./">QUBLY <span>TOOLS</span></a>
+      <a class="back" href="./">← Tutti gli strumenti</a>
+    </header>
+    <main>
+      <div class="heading">
+        <div>
+          <p class="eyebrow">Archivio visivo / Gestione</p>
+          <h1>Le immagini, nel loro ordine.</h1>
+          <p class="intro">Sostituisci o aggiungi una foto con i tre titoli. Trascina le immagini per cambiare l’ordine sul sito: la pubblicazione avviene automaticamente.</p>
+        </div>
+        <div class="access-panel">
+          <span class="access-dot" id="access-dot"></span>
+          <p id="access-label">Verifica accesso…</p>
+          <button type="button" class="button button-light" id="login">Accedi con GitHub</button>
+          <button type="button" class="button button-quiet" id="logout" hidden>Esci</button>
+        </div>
+      </div>
+
+      <div class="workspace-bar">
+        <div class="tabs" role="group" aria-label="Sezione">
+          <button class="tab" type="button" data-category="esterni" aria-pressed="true">Esterni</button>
+          <button class="tab" type="button" data-category="interni" aria-pressed="false">Interni</button>
+          <button class="tab" type="button" data-category="paesaggi" aria-pressed="false">Paesaggi</button>
+        </div>
+        <div class="workspace-actions">
+          <input id="search" type="search" placeholder="Cerca una foto" aria-label="Cerca una foto">
+          <button class="button button-light" id="add" type="button">+ Aggiungi foto</button>
+        </div>
+      </div>
+
+      <div class="grid-heading">
+        <p id="count">Caricamento…</p>
+        <p class="hint">Trascina per riordinare · su telefono usa le frecce</p>
+      </div>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+      <div class="gallery-grid" id="grid"></div>
+    </main>
+  </div>
+
+  <dialog class="editor" id="editor" aria-labelledby="editor-title">
+    <form id="editor-form">
+      <div class="editor-heading">
+        <div><p class="eyebrow" id="editor-kicker">Foto</p><h2 id="editor-title">Aggiungi una foto</h2></div>
+        <button class="close" type="button" id="close-editor" aria-label="Chiudi">×</button>
+      </div>
+      <p class="editor-lead" id="editor-lead"></p>
+      <div class="editor-current" id="editor-current" hidden><img id="current-image" alt=""><span>Foto attuale</span></div>
+      <label class="field" id="category-field">Sezione
+        <select id="category-input"><option value="esterni">Esterni</option><option value="interni">Interni</option><option value="paesaggi">Paesaggi</option></select>
+      </label>
+      <label class="dropzone" id="dropzone">
+        <input id="image-input" type="file" accept="image/jpeg,image/png,image/webp" required>
+        <span class="drop-icon">＋</span>
+        <strong id="file-label">Scegli una foto o trascinala qui</strong>
+        <small>JPG, PNG o WebP · max 10 MB · almeno 640 × 400 px</small>
+        <img id="upload-preview" alt="Anteprima della nuova foto" hidden>
+      </label>
+      <div class="title-fields">
+        <label class="field">Titolo italiano<input id="title-it" type="text" maxlength="90" required autocomplete="off"></label>
+        <label class="field">Titolo inglese<input id="title-en" type="text" maxlength="90" required autocomplete="off"></label>
+        <label class="field">Titolo sloveno<input id="title-sl" type="text" maxlength="90" required autocomplete="off"></label>
+      </div>
+      <p class="editor-message" id="editor-message" role="status"></p>
+      <button class="button button-light submit" id="publish" type="submit">Pubblica la foto</button>
+    </form>
+  </dialog>
+</body>
+</html>
