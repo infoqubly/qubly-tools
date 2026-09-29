@@ -1,6 +1,10 @@
 # QUBLY Tools
 
-Tre strumenti per lavorare con immagini nel browser. Le immagini selezionate dal computer restano locali: non vengono caricate sul sito. Le valutazioni e le categorie sono salvate nel browser, sullo stesso indirizzo web; per spostarle su un altro browser o conservarne una copia usa i file JSON esportabili.
+Tre strumenti per lavorare con immagini nel browser e un collegamento alla gestione delle gallerie del sito QUBLY. Nei tre strumenti locali, le immagini selezionate dal computer restano locali: non vengono caricate sul sito. Le valutazioni e le categorie sono salvate nel browser, sullo stesso indirizzo web; per spostarle su un altro browser o conservarne una copia usa i file JSON esportabili.
+
+## Gestione gallerie
+
+La scheda **Gestione gallerie** apre il [catalogo del sito QUBLY](https://qubly.studio/gestione-gallerie.html). Mostra sempre le foto pubblicate in Esterni, Interni e Paesaggi. Da lì scegli una foto, prepari i titoli in italiano, inglese e sloveno e completi il caricamento su GitHub. Questo è un collegamento al sito principale: i due repository restano indipendenti.
 
 ## Valutazione render
 
