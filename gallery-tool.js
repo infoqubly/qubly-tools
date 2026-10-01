@@ -5,7 +5,7 @@ const CATEGORIES = ['esterni', 'interni', 'paesaggi'];
 const $ = selector => document.querySelector(selector);
 const state = {
   category: 'esterni', catalog: null, session: sessionStorage.getItem('qubly-gallery-session'),
-  login: null, editing: null, saving: false, dragId: null, previewUrl: null
+  login: null, editing: null, removing: null, saving: false, dragId: null, previewUrl: null
 };
 
 function message(text, error = false) {
@@ -129,13 +129,21 @@ function render() {
     replace.type = 'button';
     replace.className = 'replace';
     replace.textContent = 'Sostituisci';
+    replace.disabled = state.saving;
     replace.setAttribute('aria-label', `Sostituisci ${titleOf(item)}`);
     replace.addEventListener('click', () => openEditor(item));
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'remove';
+    remove.textContent = 'Rimuovi';
+    remove.disabled = state.saving;
+    remove.setAttribute('aria-label', `Rimuovi ${titleOf(item)}`);
+    remove.addEventListener('click', () => openRemoval(item));
     const handle = document.createElement('span');
     handle.className = 'icon-button drag-handle';
     handle.textContent = '⠿';
     handle.setAttribute('aria-hidden', 'true');
-    actions.append(moveUp, moveDown, replace, handle);
+    actions.append(moveUp, moveDown, replace, remove, handle);
     body.append(title, actions);
     card.append(image, body);
     card.addEventListener('dragstart', event => {
@@ -241,6 +249,46 @@ function openEditor(item = null) {
   $('#image-input').focus();
 }
 
+function openRemoval(item) {
+  if (!requireAccess({ action: 'remove', category: state.category, id: item.id })) return;
+  state.removing = { category: state.category, id: item.id };
+  $('#remove-preview').src = imageUrl(item.preview);
+  $('#remove-preview').alt = titleOf(item);
+  $('#remove-name').textContent = titleOf(item);
+  $('#remove-message').textContent = '';
+  $('#confirm-remove').disabled = false;
+  $('#confirm-remove').textContent = 'Rimuovi la foto';
+  $('#remove-dialog').showModal();
+  $('#cancel-remove').focus();
+}
+
+async function confirmRemoval() {
+  if (state.saving || !state.removing) return;
+  const { category, id } = state.removing;
+  state.saving = true;
+  $('#confirm-remove').disabled = true;
+  $('#cancel-remove').disabled = true;
+  $('#close-remove').disabled = true;
+  $('#confirm-remove').textContent = 'Rimozione in corso…';
+  $('#remove-message').textContent = '';
+  try {
+    await api('/publish', { method: 'POST', body: JSON.stringify({ mode: 'remove', category, id }) });
+    state.catalog.sections[category] = state.catalog.sections[category].filter(item => item.id !== id);
+    state.removing = null;
+    $('#remove-dialog').close();
+    message('Foto rimossa dal catalogo. Il sito si aggiorna tra poco.');
+  } catch (error) {
+    $('#remove-message').textContent = error.message;
+  } finally {
+    state.saving = false;
+    $('#confirm-remove').disabled = false;
+    $('#cancel-remove').disabled = false;
+    $('#close-remove').disabled = false;
+    $('#confirm-remove').textContent = 'Rimuovi la foto';
+    render();
+  }
+}
+
 async function validateFile(file) {
   if (!file || !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('Scegli una foto JPG, PNG o WebP.');
   if (file.size > 10 * 1024 * 1024) throw new Error('La foto supera 10 MB. Scegline una più leggera.');
@@ -333,6 +381,11 @@ async function init() {
   $('#add').addEventListener('click', () => openEditor());
   $('#close-editor').addEventListener('click', () => $('#editor').close());
   $('#editor').addEventListener('close', clearPreview);
+  $('#close-remove').addEventListener('click', () => $('#remove-dialog').close());
+  $('#cancel-remove').addEventListener('click', () => $('#remove-dialog').close());
+  $('#confirm-remove').addEventListener('click', confirmRemoval);
+  $('#remove-dialog').addEventListener('close', () => { state.removing = null; $('#remove-preview').removeAttribute('src'); });
+  $('#remove-dialog').addEventListener('cancel', event => { if (state.saving) event.preventDefault(); });
   $('#image-input').addEventListener('change', event => showFile(event.target.files[0]));
   $('#editor-form').addEventListener('submit', publish);
   const dropzone = $('#dropzone');
@@ -367,6 +420,9 @@ async function init() {
         else if (pending.action === 'replace') {
           const item = state.catalog?.sections?.[pending.category]?.find(photo => photo.id === pending.id);
           if (item) openEditor(item);
+        } else if (pending.action === 'remove') {
+          const item = state.catalog?.sections?.[pending.category]?.find(photo => photo.id === pending.id);
+          if (item) openRemoval(item);
         }
       }
     } catch (error) { state.login = null; showAccess(); message(error.message, true); }

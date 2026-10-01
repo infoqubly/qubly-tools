@@ -7,8 +7,8 @@
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://qubly.studio blob:; connect-src 'self' https://qubly.studio; base-uri 'none'; form-action 'none'">
   <title>Gestione gallerie · QUBLY Tools</title>
-  <link rel="stylesheet" href="./gallery-tool.css?v=3">
-  <script src="./gallery-tool.js?v=3" defer></script>
+  <link rel="stylesheet" href="./gallery-tool.css?v=4">
+  <script src="./gallery-tool.js?v=4" defer></script>
 </head>
 <body>
   <div class="shell">
@@ -21,7 +21,7 @@
         <div>
           <p class="eyebrow">Archivio visivo / Gestione</p>
           <h1>Le immagini, nel loro ordine.</h1>
-          <p class="intro">Sostituisci o aggiungi una foto con i tre titoli. Trascina le immagini per cambiare l’ordine sul sito: la pubblicazione avviene automaticamente.</p>
+          <p class="intro">Aggiungi, sostituisci o rimuovi una foto. Trascina le immagini per cambiare l’ordine sul sito: la pubblicazione avviene automaticamente.</p>
         </div>
         <div class="access-panel">
           <span class="access-dot" id="access-dot"></span>
@@ -78,6 +78,22 @@
       <p class="editor-message" id="editor-message" role="status"></p>
       <button class="button button-light submit" id="publish" type="submit">Pubblica la foto</button>
     </form>
+  </dialog>
+  <dialog class="editor remove-dialog" id="remove-dialog" aria-labelledby="remove-title">
+    <div class="remove-content">
+      <div class="editor-heading">
+        <div><p class="eyebrow">Gestione galleria</p><h2 id="remove-title">Rimuovere questa foto?</h2></div>
+        <button class="close" type="button" id="close-remove" aria-label="Chiudi">×</button>
+      </div>
+      <img class="remove-preview" id="remove-preview" alt="">
+      <p class="remove-name" id="remove-name"></p>
+      <p class="remove-explanation">La foto scomparirà dalla sezione del sito. Il file resterà nel repository, così potrà essere recuperato se cambi idea.</p>
+      <p class="editor-message" id="remove-message" role="status"></p>
+      <div class="remove-actions">
+        <button class="button button-quiet" id="cancel-remove" type="button">Annulla</button>
+        <button class="button button-danger" id="confirm-remove" type="button">Rimuovi la foto</button>
+      </div>
+    </div>
   </dialog>
 </body>
 </html>
