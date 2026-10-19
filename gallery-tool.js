@@ -2,11 +2,35 @@ const API = ['localhost', '127.0.0.1'].includes(location.hostname) ? `${location
 const SITE = 'https://qubly.studio/';
 const LANGUAGES = ['it', 'en', 'sl'];
 const CATEGORIES = ['esterni', 'interni', 'paesaggi'];
+const READ_TIMEOUT_MS = 20_000;
+// A 10 MB upload and its repository writes need more time than catalog reads.
+const PUBLISH_TIMEOUT_MS = 90_000;
+const FILE_TIMEOUT_MS = 15_000;
 const $ = selector => document.querySelector(selector);
 const state = {
   category: 'esterni', catalog: null, session: sessionStorage.getItem('qubly-gallery-session'),
-  login: null, editing: null, removing: null, saving: false, dragId: null, previewUrl: null
+  login: null, editing: null, removing: null, saving: false, dragId: null, previewUrl: null,
+  catalogLoading: false, catalogRevision: 0, previewRevision: 0
 };
+
+class DeadlineError extends Error {}
+
+async function withDeadline(operation, milliseconds, timeoutMessage, onTimeout) {
+  let timer;
+  try {
+    return await Promise.race([
+      new Promise((_, reject) => {
+        timer = setTimeout(() => {
+          reject(new DeadlineError(timeoutMessage));
+          onTimeout?.();
+        }, milliseconds);
+      }),
+      Promise.resolve().then(operation)
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 function message(text, error = false) {
   const element = $('#status');
@@ -26,20 +50,39 @@ function sessionFromCallback() {
 
 async function api(path, options = {}) {
   const headers = { ...(options.body ? { 'Content-Type': 'application/json' } : {}), ...options.headers };
-  if (state.session) headers.Authorization = `Bearer ${state.session}`;
-  let response;
-  try { response = await fetch(`${API}${path}`, { cache: 'no-store', ...options, headers }); }
-  catch { throw new Error('Non riesco a collegarmi alla galleria. Riprova tra poco.'); }
-  const result = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    if (response.status === 401) {
-      state.session = null;
-      sessionStorage.removeItem('qubly-gallery-session');
-      showAccess();
+  const requestedSession = state.session;
+  if (requestedSession) headers.Authorization = `Bearer ${requestedSession}`;
+  const writing = !['GET', 'HEAD'].includes((options.method || 'GET').toUpperCase());
+  const uncertain = 'L’esito dell’operazione non è confermato. Verifica la galleria prima di riprovare.';
+  const controller = new AbortController();
+  return withDeadline(async () => {
+    let response;
+    try {
+      response = await fetch(`${API}${path}`, { cache: 'no-store', ...options, headers, signal: controller.signal });
+    } catch (error) {
+      if (controller.signal.aborted) throw error;
+      throw new Error(writing ? `La connessione si è interrotta. ${uncertain}` : 'Non riesco a collegarmi alla galleria. Riprova tra poco.');
     }
-    throw new Error(result.error || 'Operazione non riuscita. Riprova.');
-  }
-  return result;
+    if (controller.signal.aborted) throw new DeadlineError('La richiesta è scaduta.');
+    const result = await response.json().catch(error => {
+      if (controller.signal.aborted) throw error;
+      if (response.ok) throw new Error(writing ? `Risposta non valida. ${uncertain}` : 'La galleria ha restituito una risposta non valida. Riprova.');
+      return {};
+    });
+    if (controller.signal.aborted) throw new DeadlineError('La richiesta è scaduta.');
+    if (!response.ok) {
+      if (response.status === 401 && state.session === requestedSession) {
+        state.session = null;
+        state.login = null;
+        sessionStorage.removeItem('qubly-gallery-session');
+        showAccess();
+      }
+      throw new Error(result?.code === 'publication_unknown' ? uncertain : result?.error || 'Operazione non riuscita. Riprova.');
+    }
+    return result;
+  }, writing ? PUBLISH_TIMEOUT_MS : READ_TIMEOUT_MS,
+  writing ? `Tempo di attesa esaurito. ${uncertain}` : 'La galleria non ha risposto in tempo. Riprova.',
+  () => controller.abort());
 }
 
 function showAccess() {
@@ -88,6 +131,9 @@ function iconButton(symbol, label, onClick, disabled = false) {
 }
 
 function render() {
+  $('#add').disabled = state.saving || !state.catalog;
+  $('#login').disabled = state.saving;
+  $('#logout').disabled = state.saving;
   if (!state.catalog) return;
   for (const tab of document.querySelectorAll('.tab')) tab.setAttribute('aria-pressed', String(tab.dataset.category === state.category));
   const all = state.catalog.sections[state.category];
@@ -176,13 +222,35 @@ function render() {
 }
 
 async function loadCatalog() {
-  const catalog = await api('/catalog');
-  if (catalog.version !== 1 || !catalog.sections || CATEGORIES.some(category => !Array.isArray(catalog.sections[category]))) throw new Error('Catalogo non disponibile.');
-  state.catalog = catalog;
-  render();
+  if (state.saving || state.catalogLoading) return false;
+  const revision = state.catalogRevision;
+  state.catalogLoading = true;
+  $('#retry-catalog').disabled = true;
+  if (!state.catalog) $('#count').textContent = 'Caricamento…';
+  try {
+    const catalog = await api('/catalog');
+    if (catalog?.version !== 1 || !catalog.sections || CATEGORIES.some(category => !Array.isArray(catalog.sections[category]))) throw new Error('Catalogo non disponibile.');
+    // Discard a read started before a local edit, even if that edit has finished.
+    if (state.saving || revision !== state.catalogRevision) return false;
+    state.catalog = catalog;
+    $('#retry-catalog').hidden = true;
+    render();
+    resumePending();
+    return true;
+  } catch (error) {
+    if (state.saving || revision !== state.catalogRevision) return false;
+    if (!state.catalog) $('#count').textContent = 'Catalogo non disponibile';
+    $('#retry-catalog').hidden = false;
+    message(error.message, true);
+    throw error;
+  } finally {
+    state.catalogLoading = false;
+    $('#retry-catalog').disabled = false;
+  }
 }
 
 async function move(id, direction) {
+  if (state.saving || !state.catalog) return;
   if (!requireAccess({ action: 'reorder', category: state.category })) return;
   const items = state.catalog.sections[state.category];
   const from = items.findIndex(item => item.id === id);
@@ -192,6 +260,7 @@ async function move(id, direction) {
 }
 
 async function moveTo(sourceId, targetId) {
+  if (state.saving || !state.catalog) return;
   if (!requireAccess({ action: 'reorder', category: state.category })) return;
   const items = state.catalog.sections[state.category];
   const from = items.findIndex(item => item.id === sourceId);
@@ -207,6 +276,7 @@ async function reorder(from, to) {
   next.splice(to, 0, ...next.splice(from, 1));
   state.catalog.sections[category] = next;
   state.saving = true;
+  state.catalogRevision++;
   render();
   message('Salvataggio del nuovo ordine…');
   try {
@@ -222,6 +292,7 @@ async function reorder(from, to) {
 }
 
 function clearPreview() {
+  state.previewRevision++;
   if (state.previewUrl) URL.revokeObjectURL(state.previewUrl);
   state.previewUrl = null;
   $('#upload-preview').hidden = true;
@@ -230,6 +301,7 @@ function clearPreview() {
 }
 
 function openEditor(item = null) {
+  if (state.saving || !state.catalog) return;
   if (!requireAccess({ action: item ? 'replace' : 'add', category: state.category, id: item?.id })) return;
   state.editing = item;
   $('#editor-form').reset();
@@ -250,6 +322,7 @@ function openEditor(item = null) {
 }
 
 function openRemoval(item) {
+  if (state.saving || !state.catalog) return;
   if (!requireAccess({ action: 'remove', category: state.category, id: item.id })) return;
   state.removing = { category: state.category, id: item.id };
   $('#remove-preview').src = imageUrl(item.preview);
@@ -266,6 +339,8 @@ async function confirmRemoval() {
   if (state.saving || !state.removing) return;
   const { category, id } = state.removing;
   state.saving = true;
+  state.catalogRevision++;
+  render();
   $('#confirm-remove').disabled = true;
   $('#cancel-remove').disabled = true;
   $('#close-remove').disabled = true;
@@ -293,35 +368,56 @@ async function validateFile(file) {
   if (!file || !['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('Scegli una foto JPG, PNG o WebP.');
   if (file.size > 10 * 1024 * 1024) throw new Error('La foto supera 10 MB. Scegline una più leggera.');
   const url = URL.createObjectURL(file);
+  let image;
   try {
-    const dimensions = await new Promise((resolve, reject) => {
-      const image = new Image();
+    const dimensions = await withDeadline(() => new Promise((resolve, reject) => {
+      image = new Image();
       image.onload = () => resolve([image.naturalWidth, image.naturalHeight]);
-      image.onerror = reject;
+      image.onerror = () => reject(new Error('Immagine non valida'));
       image.src = url;
-    });
+    }), FILE_TIMEOUT_MS, 'La verifica della foto ha impiegato troppo tempo. Sceglila di nuovo e riprova.');
     if (dimensions[0] < 640 || dimensions[1] < 400 || dimensions[0] * dimensions[1] > 50_000_000) {
       throw new Error('Usa una foto di almeno 640 × 400 px e massimo 50 megapixel.');
     }
     return url;
   } catch (error) {
     URL.revokeObjectURL(url);
-    if (error instanceof Error && error.message.startsWith('Usa una foto')) throw error;
+    if (error instanceof DeadlineError || (error instanceof Error && error.message.startsWith('Usa una foto'))) throw error;
     throw new Error('Il file non sembra essere una foto valida.');
+  } finally {
+    if (image) {
+      image.onload = null;
+      image.onerror = null;
+      image.removeAttribute('src');
+    }
   }
 }
 
 async function showFile(file) {
+  if (state.saving) return;
   $('#editor-message').textContent = '';
   clearPreview();
+  const revision = state.previewRevision;
   try {
-    state.previewUrl = await validateFile(file);
+    const url = await validateFile(file);
+    if (revision !== state.previewRevision || state.saving || !$('#editor').open) {
+      URL.revokeObjectURL(url);
+      return;
+    }
+    state.previewUrl = url;
     $('#upload-preview').src = state.previewUrl;
     $('#upload-preview').hidden = false;
     $('#file-label').textContent = file.name;
   } catch (error) {
+    if (revision !== state.previewRevision || state.saving || !$('#editor').open) return;
     $('#image-input').value = '';
     $('#editor-message').textContent = error.message;
+  }
+}
+
+function setEditorBusy(busy) {
+  for (const selector of ['#publish', '#close-editor', '#image-input', '#category-input', ...LANGUAGES.map(language => `#title-${language}`)]) {
+    $(selector).disabled = busy;
   }
 }
 
@@ -336,21 +432,31 @@ function base64(bytes) {
 
 async function publish(event) {
   event.preventDefault();
+  if (state.saving) return;
   const file = $('#image-input').files[0];
+  const titles = Object.fromEntries(LANGUAGES.map(language => [language, $(`#title-${language}`).value.trim()]));
+  const category = $('#category-input').value;
+  const id = state.editing?.id;
+  const mode = state.editing ? 'replace' : 'add';
+  state.saving = true;
+  state.catalogRevision++;
+  setEditorBusy(true);
+  render();
   $('#editor-message').textContent = '';
   try {
-    const preview = await validateFile(file);
-    URL.revokeObjectURL(preview);
-    const titles = Object.fromEntries(LANGUAGES.map(language => [language, $(`#title-${language}`).value.trim()]));
     if (LANGUAGES.some(language => !titles[language])) throw new Error('Scrivi i titoli nelle tre lingue.');
     if (!state.session) throw new Error('Accedi a GitHub prima di pubblicare.');
-    $('#publish').disabled = true;
-    $('#publish').textContent = 'Caricamento in corso…';
+    $('#publish').textContent = 'Controllo della foto…';
+    const preview = await validateFile(file);
+    URL.revokeObjectURL(preview);
+    $('#publish').textContent = 'Lettura della foto…';
     const extension = file.type === 'image/jpeg' ? 'jpg' : file.type === 'image/png' ? 'png' : 'webp';
-    const image = base64(new Uint8Array(await file.arrayBuffer()));
+    const bytes = await withDeadline(() => file.arrayBuffer(), FILE_TIMEOUT_MS, 'La lettura della foto ha impiegato troppo tempo. Sceglila di nuovo e riprova.');
+    const image = base64(new Uint8Array(bytes));
+    $('#publish').textContent = 'Caricamento in corso…';
     await api('/publish', {
       method: 'POST',
-      body: JSON.stringify({ mode: state.editing ? 'replace' : 'add', category: $('#category-input').value, id: state.editing?.id, titles, extension, image })
+      body: JSON.stringify({ mode, category, id, titles, extension, image })
     });
     $('#editor').close();
     clearPreview();
@@ -361,8 +467,27 @@ async function publish(event) {
   } catch (error) {
     $('#editor-message').textContent = error.message;
   } finally {
-    $('#publish').disabled = false;
+    state.saving = false;
+    setEditorBusy(false);
     $('#publish').textContent = 'Pubblica la foto';
+    render();
+  }
+}
+
+function resumePending() {
+  if (!state.catalog || !state.session || !state.login || state.saving) return;
+  let pending;
+  try { pending = JSON.parse(sessionStorage.getItem('qubly-gallery-pending') || 'null'); }
+  catch { sessionStorage.removeItem('qubly-gallery-pending'); return; }
+  sessionStorage.removeItem('qubly-gallery-pending');
+  if (!pending || !CATEGORIES.includes(pending.category)) return;
+  state.category = pending.category;
+  render();
+  if (pending.action === 'add') openEditor();
+  else {
+    const item = state.catalog.sections[pending.category].find(photo => photo.id === pending.id);
+    if (item && pending.action === 'replace') openEditor(item);
+    else if (item && pending.action === 'remove') openRemoval(item);
   }
 }
 
@@ -370,17 +495,22 @@ async function init() {
   sessionFromCallback();
   $('#login').addEventListener('click', () => signIn());
   $('#logout').addEventListener('click', () => {
+    if (state.saving) return;
     sessionStorage.removeItem('qubly-gallery-session');
     state.session = null;
     state.login = null;
     showAccess();
     message('Accesso chiuso.');
   });
-  for (const tab of document.querySelectorAll('.tab')) tab.addEventListener('click', () => { state.category = tab.dataset.category; $('#search').value = ''; render(); });
+  for (const tab of document.querySelectorAll('.tab')) tab.addEventListener('click', () => { if (state.saving) return; state.category = tab.dataset.category; $('#search').value = ''; render(); });
   $('#search').addEventListener('input', render);
   $('#add').addEventListener('click', () => openEditor());
-  $('#close-editor').addEventListener('click', () => $('#editor').close());
-  $('#editor').addEventListener('close', clearPreview);
+  $('#close-editor').addEventListener('click', () => { if (!state.saving) $('#editor').close(); });
+  $('#editor').addEventListener('close', () => { state.editing = null; clearPreview(); });
+  $('#editor').addEventListener('cancel', event => { if (state.saving) event.preventDefault(); });
+  $('#retry-catalog').addEventListener('click', () => {
+    loadCatalog().then(loaded => { if (loaded) message('Galleria caricata.'); }).catch(() => {});
+  });
   $('#close-remove').addEventListener('click', () => $('#remove-dialog').close());
   $('#cancel-remove').addEventListener('click', () => $('#remove-dialog').close());
   $('#confirm-remove').addEventListener('click', confirmRemoval);
@@ -394,6 +524,7 @@ async function init() {
   dropzone.addEventListener('drop', event => {
     event.preventDefault();
     dropzone.classList.remove('over');
+    if (state.saving) return;
     const file = event.dataTransfer.files[0];
     if (file) {
       const transfer = new DataTransfer();
@@ -402,33 +533,29 @@ async function init() {
       showFile(file);
     }
   });
-  try {
-    await loadCatalog();
-    message('Le foto mostrate corrispondono alla galleria pubblicata.');
-  } catch (error) { message(error.message, true); }
-  if (state.session) {
+  render();
+  const catalogTask = loadCatalog().then(loaded => {
+    if (loaded) message('Le foto mostrate corrispondono alla galleria pubblicata.');
+  }).catch(() => {});
+  const sessionTask = (async () => {
+    if (!state.session) { showAccess(); return; }
+    const requestedSession = state.session;
     try {
       const session = await api('/session');
+      if (state.session !== requestedSession) return;
       state.login = session.login;
       showAccess();
-      const pending = JSON.parse(sessionStorage.getItem('qubly-gallery-pending') || 'null');
-      sessionStorage.removeItem('qubly-gallery-pending');
-      if (pending && CATEGORIES.includes(pending.category)) {
-        state.category = pending.category;
-        render();
-        if (pending.action === 'add') openEditor();
-        else if (pending.action === 'replace') {
-          const item = state.catalog?.sections?.[pending.category]?.find(photo => photo.id === pending.id);
-          if (item) openEditor(item);
-        } else if (pending.action === 'remove') {
-          const item = state.catalog?.sections?.[pending.category]?.find(photo => photo.id === pending.id);
-          if (item) openRemoval(item);
-        }
-      }
-    } catch (error) { state.login = null; showAccess(); message(error.message, true); }
-  } else showAccess();
+      resumePending();
+    } catch (error) {
+      if (state.session && state.session !== requestedSession) return;
+      state.login = null;
+      showAccess();
+      message(error.message, true);
+    }
+  })();
   document.addEventListener('visibilitychange', () => { if (!document.hidden && state.catalog) loadCatalog().catch(() => {}); });
   setInterval(() => { if (!document.hidden && !state.saving && !$('#editor').open) loadCatalog().catch(() => {}); }, 45000);
+  await Promise.allSettled([catalogTask, sessionTask]);
 }
 
 init();

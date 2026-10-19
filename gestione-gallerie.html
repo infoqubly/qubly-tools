@@ -8,7 +8,7 @@
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://qubly.studio blob:; connect-src 'self' https://qubly.studio; base-uri 'none'; form-action 'none'">
   <title>Gestione gallerie · QUBLY Tools</title>
   <link rel="stylesheet" href="./gallery-tool.css?v=5">
-  <script src="./gallery-tool.js?v=4" defer></script>
+  <script src="./gallery-tool.js?v=5" defer></script>
 </head>
 <body>
   <div class="shell">
@@ -44,7 +44,8 @@
       </div>
 
       <div class="grid-heading">
-        <p id="count">Caricamento…</p>
+        <p id="count" aria-live="polite">Caricamento…</p>
+        <button class="button button-quiet" id="retry-catalog" type="button" hidden>Riprova caricamento</button>
         <p class="hint">Trascina per riordinare · su telefono usa le frecce</p>
       </div>
       <p class="status" id="status" role="status" aria-live="polite"></p>
