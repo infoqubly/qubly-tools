@@ -1,0 +1,23 @@
+name: Verifica gestione gallerie
+
+on:
+  pull_request:
+    paths:
+      - gallery-tool.js
+      - gallery-tool.test.mjs
+      - gestione-gallerie.html
+      - .github/workflows/gallery-checks.yml
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Verifica recupero caricamenti e richieste lente
+        run: node --test gallery-tool.test.mjs
