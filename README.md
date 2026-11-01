@@ -26,6 +26,8 @@ La nuova schermata **Riepilogo** mostra tutte le immagini valutate, incluse quel
 
 **Esporta riepilogo CSV** nella vista Valuta include anche i file ancora da valutare della raccolta corrente. **Scarica backup dei voti (JSON)** e **Importa voti** trasferiscono i voti tra browser e PC. Il CSV usa punto e virgola e UTF-8 con BOM per Excel.
 
+Il pulsante **Griglia** mostra le celle A–L / 1–8. Scegli uno dei cinque colori numerati e seleziona con clic o trascinamento; lettere e numeri selezionano colonne o righe intere. La griglia segue zoom e schermo intero. Le celle restano solo in questo browser, associate a nome file e dimensioni: non sono incluse nel backup dei voti. Nel commento puoi scrivere, per esempio, «colore2, K3–K4». Il formato delle valutazioni resta invariato.
+
 ## Confronto immagini
 
 Trascina nella pagina due immagini, una cartella (si usano le prime due immagini in ordine di nome) oppure una singola immagine su uno dei due riquadri. Puoi anche scegliere i file dai pulsanti, confrontarli con il cursore o alternarli e usare lo schermo intero. Nessun file viene salvato sul sito.
